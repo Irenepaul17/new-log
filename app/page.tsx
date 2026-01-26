@@ -1,66 +1,118 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
 
-export default function Home() {
+import React, { useState } from "react";
+import { useGlobal } from "@/app/context/GlobalContext";
+
+export default function LoginPage() {
+  const { login } = useGlobal();
+  const [phone, setPhone] = useState("");
+  const [pass, setPass] = useState("");
+
+  const handleLogin = () => {
+    const success = login(phone, pass);
+    if (!success) {
+      alert("Invalid credentials. Try 1234567890 / admin123 or 9000000004 / je123");
+    }
+  };
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: "100vh",
+      width: "100%",
+      background: "#f8fafc",
+      position: "fixed",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0
+    }}>
+      <div
+        className="card"
+        style={{ maxWidth: "450px", width: "100%", padding: "40px", boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" }}
+      >
+        <div style={{ textAlign: "center", marginBottom: "32px" }}>
+          <div
+            style={{
+              width: "64px",
+              height: "64px",
+              background: "var(--primary)",
+              color: "white",
+              borderRadius: "16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              margin: "0 auto 16px",
+              fontSize: "24px",
+              fontWeight: 800,
+            }}
+          >
+            MS
+          </div>
+          <h2
+            style={{
+              fontSize: "24px",
+              fontWeight: 800,
+              color: "var(--text)",
+            }}
+          >
+            Welcome Back
+          </h2>
+          <p style={{ color: "var(--muted)", fontSize: "14px" }}>
+            Log in to your Work Log monitoring account
           </p>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="input-group">
+          <label>Phone Number</label>
+          <input
+            type="tel"
+            id="login-phone"
+            placeholder="Enter your 10-digit number"
+            required
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          />
         </div>
-      </main>
+
+        <div className="input-group">
+          <label>Password</label>
+          <input
+            type="password"
+            id="login-password"
+            placeholder="••••••••"
+            required
+            value={pass}
+            onChange={(e) => setPass(e.target.value)}
+          />
+        </div>
+
+        <button
+          className="btn btn-primary"
+          style={{
+            width: "100%",
+            marginTop: "12px",
+            height: "48px",
+            fontSize: "16px",
+          }}
+          onClick={handleLogin}
+        >
+          Sign In
+        </button>
+
+        <div
+          style={{
+            marginTop: "24px",
+            textAlign: "center",
+            fontSize: "13px",
+            color: "var(--muted)",
+          }}
+        >
+          Don&apos;t have an account? Contact your Branch Officer.
+        </div>
+      </div>
     </div>
   );
 }
