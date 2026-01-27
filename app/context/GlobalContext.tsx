@@ -83,6 +83,25 @@ export function GlobalProvider({ children }: { children: ReactNode }) {
     const [reports, setReports] = useState<WorkReport[]>([]);
     const [complaints, setComplaints] = useState<Complaint[]>([]);
 
+    // Initialize users in localStorage if not present
+    React.useEffect(() => {
+        const savedUsers = localStorage.getItem('users');
+        if (!savedUsers) {
+            // First time - save DEFAULT_USERS to localStorage
+            localStorage.setItem('users', JSON.stringify(DEFAULT_USERS));
+        } else {
+            // Load saved users from localStorage
+            try {
+                const loadedUsers = JSON.parse(savedUsers);
+                setUsers(loadedUsers);
+            } catch (e) {
+                console.error('Failed to load users:', e);
+                // Fallback to DEFAULT_USERS if parse fails
+                localStorage.setItem('users', JSON.stringify(DEFAULT_USERS));
+            }
+        }
+    }, []);
+
     // Load reports and complaints from localStorage on mount
     React.useEffect(() => {
         const savedReports = localStorage.getItem('workReports');
