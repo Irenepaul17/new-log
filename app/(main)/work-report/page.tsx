@@ -236,11 +236,6 @@ export default function WorkReportPage() {
                     • If more than one work is done, use "SUBMIT & ENTER ANOTHER RESPONSE"
                 </div>
 
-                {/* SECTION 1: Email */}
-                <div className="input-group">
-                    <label>Email *</label>
-                    <input type="email" readOnly style={{ background: '#f8fafc' }} value={currentUser?.email || ""} />
-                </div>
 
                 <div className="nested-container">
                     <div className="section-title" style={{ fontSize: '15px' }}>FORM</div>

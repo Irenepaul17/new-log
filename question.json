@@ -2,12 +2,6 @@
   "formTitle": "Signal Technician Log Book",
   "questions": [
     {
-      "id": "Q1",
-      "text": "Email",
-      "type": "text",
-      "required": true
-    },
-    {
       "id": "Q2",
       "text": "SSE Section",
       "type": "radio",
