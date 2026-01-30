@@ -248,7 +248,7 @@ export default function MainLayout({
                     color: 'var(--muted)',
                     marginTop: 'auto'
                 }}>
-                    S&T Digital Log Book v1.0.0 | © 2026 Indian Railways
+                    S&T Digital Log Book v0.1.1 | © 2026 Indian Railways
                 </footer>
             </main>
         </>
