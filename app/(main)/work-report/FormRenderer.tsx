@@ -97,7 +97,14 @@ export function FormRenderer({ schema, answers, setAnswer, getOptions }: Props) 
             )}
 
             {q.type === 'date' && (
-              <input type="date" value={value ?? ''} onChange={e => setAnswer(key, e.target.value)} required={!!q.required} />
+              <input
+                type="date"
+                value={value ?? ''}
+                onChange={e => setAnswer(key, e.target.value)}
+                required={!!q.required}
+                min="2000-01-01"
+                max="2100-12-31"
+              />
             )}
 
             {q.type === 'time' && (
