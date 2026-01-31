@@ -16,6 +16,21 @@ export default function WorkReportDetailModal({ report, onClose }: WorkReportDet
         return date.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
     };
 
+    // Calculate status logic for Failure reports
+    const isFailure = report.classification.toUpperCase() === 'FAILURE';
+    const linkedComplaint = isFailure ? complaints.find((c: any) =>
+        c.authorId === report.authorId &&
+        c.date === report.date &&
+        (
+            c.description === report.details?.failure?.details ||
+            c.category === report.details?.failure?.gear
+        )
+    ) : null;
+
+    const displayStatus = linkedComplaint ? linkedComplaint.status.toUpperCase() : (isFailure ? 'RECORDED' : 'SUBMITTED');
+    const statusBg = linkedComplaint && linkedComplaint.status === 'Open' ? '#ef4444' : '#22c55e';
+
+
     const renderInfoBox = (title: string, content: React.ReactNode, fullWidth = false) => (
         <div style={{
             border: '1px solid #e2e8f0',
@@ -104,14 +119,14 @@ export default function WorkReportDetailModal({ report, onClose }: WorkReportDet
                         </h2>
                         <div style={{
                             display: 'inline-block',
-                            background: '#22c55e',
+                            background: statusBg,
                             color: 'white',
                             padding: '4px 12px',
                             borderRadius: '4px',
                             fontSize: '12px',
                             fontWeight: 600
                         }}>
-                            Status: Submitted
+                            Status: {displayStatus}
                         </div>
                     </div>
                     <button
@@ -174,40 +189,21 @@ export default function WorkReportDetailModal({ report, onClose }: WorkReportDet
                                 {renderField('Station', report.station)}
                                 {renderField('Shift', report.shift)}
                                 {renderField('SSE Section', report.sseSection)}
-                                {(() => {
-                                    if (report.classification === 'FAILURE') {
-                                        // Try to find the linked complaint dynamically to show live status
-                                        // We match on author, date, and description (failure details)
-                                        // Context accessed at top level
-                                        const linkedComplaint = complaints.find((c: any) =>
-                                            c.authorId === report.authorId &&
-                                            c.date === report.date &&
-                                            (
-                                                c.description === report.details?.failure?.details ||
-                                                c.category === report.details?.failure?.gear // fuzzy match fallback
-                                            )
-                                        );
-
-                                        if (linkedComplaint) {
-                                            return (
-                                                <div style={{ marginBottom: '10px', display: 'flex' }}>
-                                                    <span style={{ fontWeight: 400, color: '#64748b', minWidth: '160px', fontSize: '13px' }}>Status:</span>
-                                                    <span style={{
-                                                        flex: 1,
-                                                        fontSize: '13px',
-                                                        fontWeight: 600,
-                                                        color: linkedComplaint.status === 'Open' ? '#ef4444' : '#22c55e'
-                                                    }}>
-                                                        {linkedComplaint.status.toUpperCase()}
-                                                    </span>
-                                                </div>
-                                            );
-                                        }
-                                        // If no complaint found (legacy data?), render "Submitted" or "Recorded"
-                                        return renderField('Status', 'Recorded');
-                                    }
-                                    return renderField('Status', 'Completed');
-                                })()}
+                                {isFailure ? (
+                                    <div style={{ marginBottom: '10px', display: 'flex' }}>
+                                        <span style={{ fontWeight: 400, color: '#64748b', minWidth: '160px', fontSize: '13px' }}>Status:</span>
+                                        <span style={{
+                                            flex: 1,
+                                            fontSize: '13px',
+                                            fontWeight: 600,
+                                            color: statusBg
+                                        }}>
+                                            {displayStatus}
+                                        </span>
+                                    </div>
+                                ) : (
+                                    renderField('Status', 'Completed')
+                                )}
                             </>
                         ))}
                     </div>
