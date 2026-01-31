@@ -1,6 +1,6 @@
 'use client';
 
-import { WorkReport } from '../context/GlobalContext';
+import { WorkReport, useGlobal } from '../context/GlobalContext';
 
 interface WorkReportDetailModalProps {
     report: WorkReport | null;
@@ -8,6 +8,7 @@ interface WorkReportDetailModalProps {
 }
 
 export default function WorkReportDetailModal({ report, onClose }: WorkReportDetailModalProps) {
+    const { complaints } = useGlobal();
     if (!report) return null;
 
     const formatDate = (dateStr: string) => {
@@ -173,7 +174,40 @@ export default function WorkReportDetailModal({ report, onClose }: WorkReportDet
                                 {renderField('Station', report.station)}
                                 {renderField('Shift', report.shift)}
                                 {renderField('SSE Section', report.sseSection)}
-                                {renderField('Status', 'Completed')}
+                                {(() => {
+                                    if (report.classification === 'FAILURE') {
+                                        // Try to find the linked complaint dynamically to show live status
+                                        // We match on author, date, and description (failure details)
+                                        // Context accessed at top level
+                                        const linkedComplaint = complaints.find((c: any) =>
+                                            c.authorId === report.authorId &&
+                                            c.date === report.date &&
+                                            (
+                                                c.description === report.details?.failure?.details ||
+                                                c.category === report.details?.failure?.gear // fuzzy match fallback
+                                            )
+                                        );
+
+                                        if (linkedComplaint) {
+                                            return (
+                                                <div style={{ marginBottom: '10px', display: 'flex' }}>
+                                                    <span style={{ fontWeight: 400, color: '#64748b', minWidth: '160px', fontSize: '13px' }}>Status:</span>
+                                                    <span style={{
+                                                        flex: 1,
+                                                        fontSize: '13px',
+                                                        fontWeight: 600,
+                                                        color: linkedComplaint.status === 'Open' ? '#ef4444' : '#22c55e'
+                                                    }}>
+                                                        {linkedComplaint.status.toUpperCase()}
+                                                    </span>
+                                                </div>
+                                            );
+                                        }
+                                        // If no complaint found (legacy data?), render "Submitted" or "Recorded"
+                                        return renderField('Status', 'Recorded');
+                                    }
+                                    return renderField('Status', 'Completed');
+                                })()}
                             </>
                         ))}
                     </div>
