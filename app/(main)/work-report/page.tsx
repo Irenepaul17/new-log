@@ -224,8 +224,13 @@ export default function WorkReportPage() {
             if (id === 'section') return { ...prev, section: value, station: "" };
 
             // Handle Disconnection pre-fill based on JSON label
-            if (id === 'classification' && value === 'Select for entering Disconnection') {
-                return { ...prev, classification: value, hasDisconnection: 'Yes', discStatus: 'Applied' };
+            if (id === 'classification') {
+                if (value === 'Select for entering Disconnection') {
+                    return { ...prev, classification: value, hasDisconnection: 'Yes', discStatus: 'Applied' };
+                }
+                if (value === 'Only Disconnection filled and cancelled') {
+                    return { ...prev, classification: value, hasDisconnection: 'Yes' };
+                }
             }
             return { ...prev, [id]: value };
         });
