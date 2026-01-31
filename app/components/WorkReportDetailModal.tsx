@@ -19,11 +19,17 @@ export default function WorkReportDetailModal({ report, onClose }: WorkReportDet
     // Calculate status logic for Failure reports
     const isFailure = report.classification.toUpperCase() === 'FAILURE';
     const linkedComplaint = isFailure ? complaints.find((c: any) =>
-        c.authorId === report.authorId &&
-        c.date === report.date &&
+        // 1. Direct ID match (rare but possible in test data)
+        c.id === report.id ||
+        // 2. Logic match
         (
-            c.description === report.details?.failure?.details ||
-            c.category === report.details?.failure?.gear
+            c.authorId === report.authorId &&
+            (
+                // Relaxed description match (Complaint description contains Report description)
+                (report.details?.failure?.details && c.description.toLowerCase().includes(report.details.failure.details.toLowerCase())) ||
+                // Fallback to strict category + date match
+                (c.category === report.details?.failure?.gear && c.date === report.date)
+            )
         )
     ) : null;
 
