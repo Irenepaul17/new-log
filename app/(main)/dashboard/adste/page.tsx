@@ -5,17 +5,43 @@ import { useState } from "react";
 import WorkReportDetailModal from "@/app/components/WorkReportDetailModal";
 import ComplaintDetailModal from "@/app/components/ComplaintDetailModal";
 import { WorkReport, Complaint } from "@/app/context/GlobalContext";
+import { usePaginatedData } from '@/app/hooks/usePaginatedData';
+import { PaginationControls } from '@/app/components/PaginationControls';
 
 export default function ADSTEDashboard() {
-    const { currentUser, reports, complaints } = useGlobal();
+    const { currentUser } = useGlobal(); // Removed reports/complaints from global
     const [viewingReport, setViewingReport] = useState<WorkReport | null>(null);
     const [viewingComplaint, setViewingComplaint] = useState<Complaint | null>(null);
 
-    if (!currentUser) return null;
+    // Fetch Paginated Reports
+    const {
+        data: myReports,
+        loading: reportsLoading,
+        page: reportsPage,
+        setPage: setReportsPage,
+        meta: reportsMeta
+    } = usePaginatedData<WorkReport>(
+        '/api/work-reports',
+        { userId: currentUser?.id || '', role: currentUser?.role || '' },
+        10,
+        !!currentUser
+    );
 
-    // API already filters based on role - no need for client-side filtering
-    const myReports = reports;
-    const teamComplaints = complaints;
+    // Fetch Paginated Complaints
+    const {
+        data: teamComplaints,
+        loading: complaintsLoading,
+        page: complaintsPage,
+        setPage: setComplaintsPage,
+        meta: complaintsMeta
+    } = usePaginatedData<Complaint>(
+        '/api/complaints',
+        { userId: currentUser?.id || '', role: currentUser?.role || '' },
+        10,
+        !!currentUser
+    );
+
+    if (!currentUser) return null;
 
     return (
         <div className="screen active" style={{ display: "block" }}>
@@ -26,30 +52,43 @@ export default function ADSTEDashboard() {
             <div className="card">
                 <div className="section-title">Team Hierarchy Reports</div>
                 <div className="table-container">
-                    <table>
-                        <thead>
-                            <tr><th>Date</th><th>Author</th><th>Work</th><th>Station</th><th>Actions</th></tr>
-                        </thead>
-                        <tbody>
-                            {myReports.map((r) => (
-                                <tr key={r.id}>
-                                    <td>{r.date}</td>
-                                    <td>{r.authorName}</td>
-                                    <td>{r.classification.toUpperCase()}</td>
-                                    <td>{r.station}</td>
-                                    <td>
-                                        <button
-                                            onClick={() => setViewingReport(r)}
-                                            className="btn btn-sm btn-primary"
-                                            style={{ padding: '4px 12px', fontSize: '12px' }}
-                                        >
-                                            View
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    {reportsLoading ? (
+                        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)' }}>Loading reports...</div>
+                    ) : (
+                        <table>
+                            <thead>
+                                <tr><th>Date</th><th>Author</th><th>Work</th><th>Station</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody>
+                                {myReports.map((r: WorkReport) => (
+                                    <tr key={r.id}>
+                                        <td>{r.date}</td>
+                                        <td>{r.authorName}</td>
+                                        <td>{r.classification ? r.classification.toUpperCase() : 'N/A'}</td>
+                                        <td>{r.station}</td>
+                                        <td>
+                                            <button
+                                                onClick={() => setViewingReport(r)}
+                                                className="btn btn-sm btn-primary"
+                                                style={{ padding: '4px 12px', fontSize: '12px' }}
+                                            >
+                                                View
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                    {reportsMeta && (
+                        <PaginationControls
+                            currentPage={reportsPage}
+                            totalPages={reportsMeta.totalPages}
+                            totalItems={reportsMeta.total}
+                            onPageChange={setReportsPage}
+                            loading={reportsLoading}
+                        />
+                    )}
                 </div>
             </div>
 
@@ -59,46 +98,59 @@ export default function ADSTEDashboard() {
                     💡 Monitoring view only. Complaints are resolved by SSE/JE personnel.
                 </div>
                 <div className="table-container">
-                    <table>
-                        <thead>
-                            <tr><th>ID</th><th>Status</th><th>Raised By</th><th>Issue</th><th>Resolved By</th><th>Actions</th></tr>
-                        </thead>
-                        <tbody>
-                            {teamComplaints.length > 0 ? teamComplaints.map((c) => (
-                                <tr key={c.id}>
-                                    <td>{c.id}</td>
-                                    <td>
-                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                            {c.status === 'Open' && <span className="badge" style={{ backgroundColor: '#ef4444', color: 'white', fontSize: '10px' }}>OPEN</span>}
-                                            <span className={`badge badge-${c.status.toLowerCase().replace(' ', '-')}`}>{c.status}</span>
-                                        </div>
-                                    </td>
-                                    <td>{c.authorName}</td>
-                                    <td>{c.description}</td>
-                                    <td>
-                                        {c.status === 'Closed' ? (
-                                            <span style={{ fontSize: '13px', color: '#065f46' }}>
-                                                {c.resolvedBy} ({c.resolvedDate})
-                                            </span>
-                                        ) : (
-                                            <span style={{ fontSize: '13px', color: 'var(--muted)' }}>Pending</span>
-                                        )}
-                                    </td>
-                                    <td>
-                                        <button
-                                            onClick={() => setViewingComplaint(c)}
-                                            className="btn btn-sm btn-primary"
-                                            style={{ padding: '4px 12px', fontSize: '12px' }}
-                                        >
-                                            View
-                                        </button>
-                                    </td>
-                                </tr>
-                            )) : (
-                                <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--muted)' }}>No team failure reports yet.</td></tr>
-                            )}
-                        </tbody>
-                    </table>
+                    {complaintsLoading ? (
+                        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)' }}>Loading complaints...</div>
+                    ) : (
+                        <table>
+                            <thead>
+                                <tr><th>ID</th><th>Status</th><th>Raised By</th><th>Issue</th><th>Resolved By</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody>
+                                {teamComplaints.length > 0 ? teamComplaints.map((c: Complaint) => (
+                                    <tr key={c.id}>
+                                        <td>{c.id}</td>
+                                        <td>
+                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                {c.status === 'Open' && <span className="badge" style={{ backgroundColor: '#ef4444', color: 'white', fontSize: '10px' }}>OPEN</span>}
+                                                <span className={`badge badge-${c.status.toLowerCase().replace(' ', '-')}`}>{c.status}</span>
+                                            </div>
+                                        </td>
+                                        <td>{c.authorName}</td>
+                                        <td>{c.description}</td>
+                                        <td>
+                                            {c.status === 'Closed' ? (
+                                                <span style={{ fontSize: '13px', color: '#065f46' }}>
+                                                    {c.resolvedBy} ({c.resolvedDate})
+                                                </span>
+                                            ) : (
+                                                <span style={{ fontSize: '13px', color: 'var(--muted)' }}>Pending</span>
+                                            )}
+                                        </td>
+                                        <td>
+                                            <button
+                                                onClick={() => setViewingComplaint(c)}
+                                                className="btn btn-sm btn-primary"
+                                                style={{ padding: '4px 12px', fontSize: '12px' }}
+                                            >
+                                                View
+                                            </button>
+                                        </td>
+                                    </tr>
+                                )) : (
+                                    <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--muted)' }}>No team failure reports yet.</td></tr>
+                                )}
+                            </tbody>
+                        </table>
+                    )}
+                    {complaintsMeta && (
+                        <PaginationControls
+                            currentPage={complaintsPage}
+                            totalPages={complaintsMeta.totalPages}
+                            totalItems={complaintsMeta.total}
+                            onPageChange={setComplaintsPage}
+                            loading={complaintsLoading}
+                        />
+                    )}
                 </div>
             </div>
 

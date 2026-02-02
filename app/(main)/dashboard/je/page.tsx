@@ -7,17 +7,46 @@ import { ResolutionModal } from "@/app/components/ResolutionModal";
 import { Complaint, WorkReport } from "@/app/context/GlobalContext";
 import WorkReportDetailModal from "@/app/components/WorkReportDetailModal";
 import ComplaintDetailModal from "@/app/components/ComplaintDetailModal";
+import { usePaginatedData } from '@/app/hooks/usePaginatedData';
+import { PaginationControls } from '@/app/components/PaginationControls';
 
 export default function JEDashboard() {
-    const { currentUser, reports, complaints, resolveComplaint } = useGlobal();
+    const { currentUser, resolveComplaint } = useGlobal(); // Removed reports/complaints from global
     const router = useRouter();
     const [resolvingComplaint, setResolvingComplaint] = useState<Complaint | null>(null);
     const [viewingReport, setViewingReport] = useState<WorkReport | null>(null);
     const [viewingComplaint, setViewingComplaint] = useState<Complaint | null>(null);
 
-    // Filter reports/complaints for current JE
-    const myReports = reports.filter(r => r.authorId === currentUser?.id);
-    const myComplaints = complaints.filter(c => c.authorId === currentUser?.id || c.supervisorId === currentUser?.id);
+    // Fetch Paginated Reports (JE only sees own reports)
+    const {
+        data: myReports,
+        loading: reportsLoading,
+        page: reportsPage,
+        setPage: setReportsPage,
+        meta: reportsMeta
+    } = usePaginatedData<WorkReport>(
+        '/api/work-reports',
+        { userId: currentUser?.id || '', role: 'je' },
+        10,
+        !!currentUser
+    );
+
+    // Fetch Paginated Complaints (JE sees own + supervisor assigned)
+    const {
+        data: myComplaints,
+        loading: complaintsLoading,
+        page: complaintsPage,
+        setPage: setComplaintsPage,
+        meta: complaintsMeta,
+        refresh: refreshComplaints
+    } = usePaginatedData<Complaint>(
+        '/api/complaints',
+        { userId: currentUser?.id || '', role: 'je' },
+        10,
+        !!currentUser
+    );
+
+    if (!currentUser) return null;
 
     return (
         <div className="screen active" style={{ display: "block" }}>
@@ -35,45 +64,58 @@ export default function JEDashboard() {
                     </button>
                 </div>
                 <div className="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Description</th>
-                                <th>Technician</th>
-                                <th>Photos</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {myReports.length > 0 ? myReports.map((r) => (
-                                <tr key={r.id}>
-                                    <td>{r.date}</td>
-                                    <td>{r.classification.toUpperCase()}</td>
-                                    <td>{currentUser?.name}</td>
-                                    <td>
-                                        <span className="badge" style={{
-                                            backgroundColor: r.attachments && r.attachments.length > 0 ? '#10b981' : '#e5e7eb',
-                                            color: r.attachments && r.attachments.length > 0 ? 'white' : '#6b7280'
-                                        }}>
-                                            {r.attachments ? r.attachments.length : 0} {r.attachments && r.attachments.length === 1 ? 'FILE' : 'FILES'}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button
-                                            onClick={() => setViewingReport(r)}
-                                            className="btn btn-sm btn-outline"
-                                            style={{ fontSize: '13px', padding: '6px 12px' }}
-                                        >
-                                            View
-                                        </button>
-                                    </td>
+                    {reportsLoading ? (
+                        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)' }}>Loading reports...</div>
+                    ) : (
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th>Technician</th>
+                                    <th>Photos</th>
+                                    <th>Actions</th>
                                 </tr>
-                            )) : (
-                                <tr><td colSpan={5} style={{ textAlign: 'center', color: 'var(--muted)' }}>No reports found.</td></tr>
-                            )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {myReports.length > 0 ? myReports.map((r: WorkReport) => (
+                                    <tr key={r.id}>
+                                        <td>{r.date}</td>
+                                        <td>{r.classification ? r.classification.toUpperCase() : 'N/A'}</td>
+                                        <td>{currentUser?.name}</td>
+                                        <td>
+                                            <span className="badge" style={{
+                                                backgroundColor: r.attachments && r.attachments.length > 0 ? '#10b981' : '#e5e7eb',
+                                                color: r.attachments && r.attachments.length > 0 ? 'white' : '#6b7280'
+                                            }}>
+                                                {r.attachments ? r.attachments.length : 0} {r.attachments && r.attachments.length === 1 ? 'FILE' : 'FILES'}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button
+                                                onClick={() => setViewingReport(r)}
+                                                className="btn btn-sm btn-outline"
+                                                style={{ fontSize: '13px', padding: '6px 12px' }}
+                                            >
+                                                View
+                                            </button>
+                                        </td>
+                                    </tr>
+                                )) : (
+                                    <tr><td colSpan={5} style={{ textAlign: 'center', color: 'var(--muted)' }}>No reports found.</td></tr>
+                                )}
+                            </tbody>
+                        </table>
+                    )}
+                    {reportsMeta && (
+                        <PaginationControls
+                            currentPage={reportsPage}
+                            totalPages={reportsMeta.totalPages}
+                            totalItems={reportsMeta.total}
+                            onPageChange={setReportsPage}
+                            loading={reportsLoading}
+                        />
+                    )}
                 </div>
             </div>
 
@@ -84,60 +126,70 @@ export default function JEDashboard() {
                 <div className="alert alert-info" style={{ marginBottom: '20px', fontSize: '13px' }}>
                     💡 Complaints are automatically generated when you report ANY failure (except "No Failures" status).
                 </div>
-                <div id="je-complaints-container">
-                    {myComplaints.length > 0 ? myComplaints.map(c => (
-                        <div key={c.id} style={{
-                            border: "1px solid var(--border)",
-                            borderRadius: "var(--radius-md)",
-                            padding: "24px",
-                            marginBottom: "20px",
-                            borderColor: c.status === 'Open' ? 'var(--primary)' : '#10b981',
-                            background: c.status === 'Open' ? 'var(--primary-soft)' : '#f0fdf4'
-                        }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
-                                <div>
-                                    <div style={{ fontWeight: 700, fontSize: "18px" }}>Failure Report #{c.id}</div>
-                                    <div style={{ color: "var(--muted)", fontSize: "14px" }}>Reported on: {c.date}</div>
-                                </div>
-                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                    {c.status === 'Open' && <span className="badge" style={{ backgroundColor: '#ef4444', color: 'white' }}>NEW</span>}
-                                    <span className={`badge badge-${c.status.toLowerCase().replace(' ', '-')}`}>{c.status}</span>
-                                </div>
-                            </div>
-                            <div style={{ marginBottom: "16px" }}>
-                                <div style={{ fontSize: "12px", color: "var(--muted)", textTransform: "uppercase", fontWeight: 600, marginBottom: "4px" }}>Failure Details</div>
-                                <div style={{ fontSize: "15px", fontWeight: 500 }}>{c.description}</div>
-                            </div>
-                            <div style={{ display: "flex", gap: "12px", fontSize: "13px", color: "var(--muted)", paddingTop: "16px", borderTop: "1px solid rgba(0,0,0,0.05)" }}>
-                                <div>Category: <span style={{ fontWeight: 600, color: "var(--text)" }}>{c.category}</span></div>
-                                <div>•</div>
-                                <div>Assigned to: <span style={{ fontWeight: 600, color: "var(--text)" }}>Superior</span></div>
-                            </div>
-                            {c.status === 'Closed' && (
-                                <div style={{ marginTop: '12px', color: '#065f46', fontSize: '13px', fontWeight: 600 }}>
-                                    ✅ Resolved by {c.resolvedBy} on {c.resolvedDate}
-                                </div>
-                            )}
-                            <div style={{ marginTop: '16px', display: 'flex', gap: '12px' }}>
-                                <button
-                                    onClick={() => setViewingComplaint(c)}
-                                    className="btn btn-outline btn-sm"
-                                >
-                                    View Details
-                                </button>
-                                {c.status === 'Open' && (
-                                    <button
-                                        onClick={() => setResolvingComplaint(c)}
-                                        className="btn btn-primary btn-sm"
-                                    >
-                                        🔧 Resolve Complaint
-                                    </button>
-                                )}</div>
-                        </div>
-                    )) : (
-                        <div style={{ color: 'var(--muted)', padding: '20px', textAlign: 'center' }}>
-                            No failure reports yet. Failures with "Yes & Booked" status will appear here.
-                        </div>
+                <div className="table-container">
+                    {complaintsLoading ? (
+                        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)' }}>Loading complaints...</div>
+                    ) : (
+                        <table>
+                            <thead>
+                                <tr><th>ID</th><th>Status</th><th>Raised By</th><th>Issue</th><th>Resolved By</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody>
+                                {myComplaints.length > 0 ? myComplaints.map((c: Complaint) => (
+                                    <tr key={c.id}>
+                                        <td>{c.id}</td>
+                                        <td>
+                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                {c.status === 'Open' && <span className="badge" style={{ backgroundColor: '#ef4444', color: 'white', fontSize: '10px' }}>NEW</span>}
+                                                <span className={`badge badge-${c.status.toLowerCase().replace(' ', '-')}`}>{c.status}</span>
+                                            </div>
+                                        </td>
+                                        <td>{c.authorName}</td>
+                                        <td>{c.description}</td>
+                                        <td>
+                                            {c.status === 'Closed' ? (
+                                                <span style={{ fontSize: '13px', color: '#065f46' }}>
+                                                    {c.resolvedBy} ({c.resolvedDate})
+                                                </span>
+                                            ) : (
+                                                <span style={{ fontSize: '13px', color: 'var(--muted)' }}>Pending</span>
+                                            )}
+                                        </td>
+                                        <td>
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                <button
+                                                    onClick={() => setViewingComplaint(c)}
+                                                    className="btn btn-sm btn-primary"
+                                                    style={{ padding: '4px 12px', fontSize: '12px' }}
+                                                >
+                                                    View
+                                                </button>
+                                                {c.status === 'Open' && (
+                                                    <button
+                                                        className="btn btn-primary btn-sm"
+                                                        onClick={() => setResolvingComplaint(c)}
+                                                        style={{ padding: '4px 12px', fontSize: '12px' }}
+                                                    >
+                                                        Resolve
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )) : (
+                                    <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--muted)' }}>No failure reports yet.</td></tr>
+                                )}
+                            </tbody>
+                        </table>
+                    )}
+                    {complaintsMeta && (
+                        <PaginationControls
+                            currentPage={complaintsPage}
+                            totalPages={complaintsMeta.totalPages}
+                            totalItems={complaintsMeta.total}
+                            onPageChange={setComplaintsPage}
+                            loading={complaintsLoading}
+                        />
                     )}
                 </div>
             </div>
@@ -150,6 +202,7 @@ export default function JEDashboard() {
                     onResolve={async (data) => {
                         await resolveComplaint(resolvingComplaint.id, data);
                         setResolvingComplaint(null);
+                        refreshComplaints(); // Refresh list after resolution
                     }}
                 />
             )}

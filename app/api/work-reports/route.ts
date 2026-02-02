@@ -25,6 +25,8 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const userId = searchParams.get('userId');
         const role = searchParams.get('role');
+        const pageParam = searchParams.get('page');
+        const limitParam = searchParams.get('limit');
 
         let query: any = {};
 
@@ -53,8 +55,35 @@ export async function GET(request: Request) {
             }
         }
 
+        // Pagination Logic
+        if (pageParam && limitParam) {
+            const page = parseInt(pageParam, 10) || 1;
+            const limit = parseInt(limitParam, 10) || 10;
+            const skip = (page - 1) * limit;
+
+            const total = await WorkReportModel.countDocuments(query);
+            const reports = await WorkReportModel.find(query)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
+
+            const totalPages = Math.ceil(total / limit);
+
+            return NextResponse.json({
+                data: reports,
+                meta: {
+                    total,
+                    page,
+                    limit,
+                    totalPages
+                }
+            });
+        }
+
+        // Legacy: Return all (for GlobalContext backward compatibility)
         const reports = await WorkReportModel.find(query).sort({ createdAt: -1 });
         return NextResponse.json(reports);
+
     } catch (error) {
         console.error('Failed to fetch reports:', error);
         return NextResponse.json({ error: 'Failed to fetch reports' }, { status: 500 });
