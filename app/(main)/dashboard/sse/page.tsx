@@ -1,7 +1,7 @@
 "use client";
 
 import { useGlobal } from "@/app/context/GlobalContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ResolutionModal } from "@/app/components/ResolutionModal";
 import WorkReportDetailModal from "@/app/components/WorkReportDetailModal";
 import ComplaintDetailModal from "@/app/components/ComplaintDetailModal";
@@ -17,6 +17,16 @@ export default function SSEDashboard() {
     const [viewingReport, setViewingReport] = useState<WorkReport | null>(null);
     const [viewingComplaint, setViewingComplaint] = useState<Complaint | null>(null);
     const [isAssetModalOpen, setIsAssetModalOpen] = useState(false);
+    const [assetStats, setAssetStats] = useState({ ei: 0, points: 0, signals: 0, trackCircuits: 0 });
+
+    useEffect(() => {
+        fetch('/api/assets/stats')
+            .then(res => res.json())
+            .then(data => {
+                setAssetStats(prev => ({ ...prev, ...data }));
+            })
+            .catch(err => console.error("Failed to load asset stats", err));
+    }, []);
 
     // Fetch Paginated Reports
     const {
@@ -55,17 +65,108 @@ export default function SSEDashboard() {
                 <strong>SSE ({currentUser.name}) DASHBOARD:</strong> Authority over JE & Technicians in your section.
             </div>
 
+            {/* Asset Stats Dashboard */}
+            <div className="card" style={{ marginBottom: '20px', padding: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                    <h3 className="section-title" style={{ fontSize: '18px', margin: 0 }}>Asset Overview</h3>
+                    <button
+                        className="btn btn-primary"
+                        onClick={() => setIsAssetModalOpen(true)}
+                        style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px', fontSize: '14px' }}
+                    >
+                        <span>+</span> Manage Assets
+                    </button>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px' }}>
+
+                    {/* EI Assets */}
+                    <div style={{
+                        background: '#f0f9ff',
+                        border: '1px solid #bae6fd',
+                        borderRadius: '12px',
+                        padding: '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                    }}>
+                        <div style={{ fontSize: '36px', fontWeight: '800', color: '#0284c7', lineHeight: 1, marginBottom: '8px' }}>
+                            {assetStats.ei}
+                        </div>
+                        <div style={{ fontSize: '14px', color: '#0369a1', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                            EI Assets
+                        </div>
+                    </div>
+
+                    {/* Points */}
+                    <div style={{
+                        background: '#fdf2f8',
+                        border: '1px solid #fbcfe8',
+                        borderRadius: '12px',
+                        padding: '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                    }}>
+                        <div style={{ fontSize: '36px', fontWeight: '800', color: '#db2777', lineHeight: 1, marginBottom: '8px' }}>
+                            {assetStats.points}
+                        </div>
+                        <div style={{ fontSize: '14px', color: '#be185d', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                            Points
+                        </div>
+                    </div>
+
+                    {/* Signals */}
+                    <div style={{
+                        background: '#fefce8',
+                        border: '1px solid #fde047',
+                        borderRadius: '12px',
+                        padding: '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                    }}>
+                        <div style={{ fontSize: '36px', fontWeight: '800', color: '#ca8a04', lineHeight: 1, marginBottom: '8px' }}>
+                            {assetStats.signals}
+                        </div>
+                        <div style={{ fontSize: '14px', color: '#a16207', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                            Signals
+                        </div>
+                    </div>
+
+                    {/* Track Circuits */}
+                    <div style={{
+                        background: '#f0fdf4',
+                        border: '1px solid #bbf7d0',
+                        borderRadius: '12px',
+                        padding: '20px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                    }}>
+                        <div style={{ fontSize: '36px', fontWeight: '800', color: '#16a34a', lineHeight: 1, marginBottom: '8px' }}>
+                            {assetStats.trackCircuits}
+                        </div>
+                        <div style={{ fontSize: '14px', color: '#15803d', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                            Track Circuits
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
             <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
                 <a href="/work-report" className="btn btn-primary" style={{ display: 'inline-block', textDecoration: 'none' }}>
                     + Submit Your Work Log
                 </a>
-                <button
-                    className="btn btn-outline"
-                    onClick={() => setIsAssetModalOpen(true)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '5px' }}
-                >
-                    Asset
-                </button>
             </div>
 
             <div className="card">
