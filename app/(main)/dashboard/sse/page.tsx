@@ -139,7 +139,6 @@ export default function SSEDashboard() {
                     {renderAssetCard("Points", assetStats.points, assetStats.recent.points, "#db2777", "#fdf2f8", "#fbcfe8")}
                     {renderAssetCard("Signals", assetStats.signals, assetStats.recent.signals, "#ca8a04", "#fefce8", "#fde047")}
                     {renderAssetCard("Track Circuits", assetStats.trackCircuits, assetStats.recent.trackCircuits, "#16a34a", "#f0fdf4", "#bbf7d0")}
-                    {renderAssetCard("Axle Counters", (assetStats as any).axleCounters || 0, (assetStats.recent as any).axleCounters || 0, "#6366f1", "#eef2ff", "#c7d2fe")}
                 </div>
             </div>
 

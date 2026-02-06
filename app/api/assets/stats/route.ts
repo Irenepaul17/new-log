@@ -4,7 +4,6 @@ import EIAssetModel from '@/app/models/EIAsset';
 import PointAssetModel from '@/app/models/PointAsset';
 import SignalAssetModel from '@/app/models/SignalAsset';
 import TrackCircuitAssetModel from '@/app/models/TrackCircuitAsset';
-import AxleCounterAssetModel from '@/app/models/AxleCounterAsset';
 
 export async function GET() {
     try {
@@ -13,19 +12,17 @@ export async function GET() {
         const recentDate = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
         const [
-            eiCount, pointCount, signalCount, tcCount, acCount,
-            recentEiCount, recentPointCount, recentSignalCount, recentTcCount, recentAcCount
+            eiCount, pointCount, signalCount, tcCount,
+            recentEiCount, recentPointCount, recentSignalCount, recentTcCount
         ] = await Promise.all([
             EIAssetModel.countDocuments(),
             PointAssetModel.countDocuments(),
             SignalAssetModel.countDocuments(),
             TrackCircuitAssetModel.countDocuments(),
-            AxleCounterAssetModel.countDocuments(),
             EIAssetModel.countDocuments({ createdAt: { $gte: recentDate } }),
             PointAssetModel.countDocuments({ createdAt: { $gte: recentDate } }),
             SignalAssetModel.countDocuments({ createdAt: { $gte: recentDate } }),
             TrackCircuitAssetModel.countDocuments({ createdAt: { $gte: recentDate } }),
-            AxleCounterAssetModel.countDocuments({ createdAt: { $gte: recentDate } })
         ]);
 
         return NextResponse.json({
@@ -33,13 +30,11 @@ export async function GET() {
             points: pointCount,
             signals: signalCount,
             trackCircuits: tcCount,
-            axleCounters: acCount,
             recent: {
                 ei: recentEiCount,
                 points: recentPointCount,
                 signals: recentSignalCount,
                 trackCircuits: recentTcCount,
-                axleCounters: recentAcCount
             }
         });
     } catch (error) {

@@ -15,7 +15,6 @@ export default function AssetSelectionModal({ isOpen, onClose }: AssetSelectionM
         { name: "Signal", path: "/dashboard/assets/signal" },
         { name: "EI", path: "/dashboard/assets/ei" },
         { name: "Track Circuit", path: "/dashboard/assets/track-circuit" },
-        { name: "Axle Counter", path: "/dashboard/assets/axle-counter" },
     ];
 
     const handleSelect = (assetPath: string) => {
