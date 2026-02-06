@@ -112,7 +112,7 @@ export default function EIAssetsPage() {
                 </div>
             </div>
 
-            <div className="card">
+            <div className="card" style={{ padding: 0 }}>
                 <div className="table-container" style={{ overflowX: 'auto' }}>
                     {loading ? (
                         <div style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)' }}>Loading assets...</div>
@@ -270,13 +270,15 @@ export default function EIAssetsPage() {
                         </table>
                     )}
                     {meta && (
-                        <PaginationControls
-                            currentPage={page}
-                            totalPages={meta.totalPages}
-                            totalItems={meta.total}
-                            onPageChange={setPage}
-                            loading={loading}
-                        />
+                        <div style={{ padding: '24px' }}>
+                            <PaginationControls
+                                currentPage={page}
+                                totalPages={meta.totalPages}
+                                totalItems={meta.total}
+                                onPageChange={setPage}
+                                loading={loading}
+                            />
+                        </div>
                     )}
                 </div>
             </div>

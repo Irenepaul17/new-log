@@ -192,9 +192,9 @@ export default function WorkReportPage() {
             console.log("Report submitted. Classification:", classification, "FailureStatus:", answers.failureStatus);
 
 
-            // Auto-create complaint for ANY failure report
+            // Auto-create failure for ANY failure report
             if (classification === 'failure' && answers.gearFailed) {
-                console.log("Auto-generating complaint for:", answers.gearFailed);
+                console.log("Auto-generating failure for:", answers.gearFailed);
                 await addComplaint({
                     authorId: currentUser.id,
                     authorName: currentUser.name,
@@ -205,16 +205,16 @@ export default function WorkReportPage() {
             }
 
             if (submitAnother) {
-                alert("✅ Work log submitted successfully! Form reset for another entry.");
+                alert("✅ Log entry submitted successfully! Form reset for another entry.");
                 resetForm();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
-                alert("✅ Work log submitted successfully!");
+                alert("✅ Log entry submitted successfully!");
                 router.push(`/dashboard/${currentUser.role === 'technician' ? 'je' : currentUser.role}`);
             }
         } catch (error) {
             console.error("Submission error:", error);
-            alert("❌ Failed to submit work report. Please check your internet connection and try again.\n\nError: " + (error instanceof Error ? error.message : 'Unknown error'));
+            alert("❌ Failed to submit log entry. Please check your internet connection and try again.\n\nError: " + (error instanceof Error ? error.message : 'Unknown error'));
         }
     };
 
@@ -277,7 +277,7 @@ export default function WorkReportPage() {
                     <span>Back to Dashboard</span>
                 </button>
 
-                <div className="section-title">S & T WORK LOG BOOK</div>
+                <div className="section-title">TECHNICIAN'S LOG BOOK</div>
 
                 <div className="alert alert-info" style={{ marginBottom: '24px' }}>
                     <strong>GENERAL INSTRUCTIONS:</strong><br />

@@ -1,0 +1,50 @@
+S No,SSE Section,STATION,Point No,Main Line / LoopLine,LAYOUT,143MM / 220MM,Facing Point,Anti-Theft Nut,"Anti-Theft Nut 
+Full Set /Partial/ Not provided",Date Installation of anti theft fastners,provision of plates for protection of P-Bracket is done,Date Installation of provision of plates for protection of P-Bracket is done,provision of plates for protection of Lost Motion Stretcher bar is done,Date of installation of Lost Motion Stretcher bar is done,Last Date of Point Insulation Replaced,Due Point Insulation Replacement,"MICHUANG
+WATER LOGGING
+(Fully Submerged for Very Heavy rain)",Fully Submerged for Heavy rain,Galvanized Ground Connections,Date of Provision of Point Galvanized Roddings,FY of Provision of Point Galvanized Roddings,POINT MACHINE SL NO,Year of Manufacture,Make,Installed Date,Motor Sl.No,"Motor Type
+IP67 / NORMAL",Motor Make,At-Km,Location Number,"SSD Insulation (Claw / T type)
+only for 220mm point machine","1. M.S. Flat tie bar to Drg. no. RDSO/T-9650 with bend used in sleepers on the opposite side of point machine & where dowel hole not given in existing sleeper, holes shall be drilled as per dowel position given in above drawing RDSO/T-6155.
+",2. ERC's MK-III to Drg. no. RDSO/T- 3701 replaced with ERC's MK-V Drg. no. RDSO/T-5919 from sleeper no. 01 to 27 in existing track.,3. insulating liner to Drg. no. RDSO/T- 3706 replaced with Metal liner to Drg. no. RDSO/T-3740 from sleeper no. 03 to 27 in existing track.,Circuit,No. of QBCA1 Relays,"WCR A/B 
+(Non RDSO)
+Date of Manufacture","WCR A/B 
+(Non RDSO)
+Date Tested","WCZR1 
+(RDSO)
+Date of Manufacture","WCZR1 
+(RDSO)
+Date Tested","NWCZR 
+(RDSO)
+Date of Manufacture","NWCZR 
+(RDSO)
+Date Tested","RWCZR 
+(RDSO)
+Date of Manufacture","RWCZR 
+(RDSO)
+Date Tested",Single End/Double End,Point group paralleling Done
+618,TRL,TI,101A,Main Line,1 IN 12,220,YES,PTJ,Partially Provided,7/6/2025,NO,,NA,,4/7/2024,10/7/2024,NO,NO,Not Available,,,3551,2022,S&T PTJ,4/7/2024,22040153,Normal,GLOBE SCOTT,28/10A-12A,L-3,T Type,PROVIDED,PROVIDED,PROVIDED,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+619,TRL,TI,101B,Main Line,1 IN 12,220,YES,PTJ,Partially Provided,7/6/2025,NO,,NA,,2/2/2024,8/2/2024,NO,NO,Not Available,,,3552,2022,S&T PTJ,2/2/2024,22040042,Normal,GLOBE SCOTT,28/8A-10,L-3,T Type,PROVIDED,PROVIDED,PROVIDED,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+620,TRL,TI,103A,Main Line,1 IN 12,220,YES,PTJ,Full Set Provided,6/9/2025,NO,,NO,,2/12/2025,8/12/2025,NO,NO,Not Available,,,3941,2022,S&T PTJ,3/7/2024,22040616,Normal,GLOBE SCOTT,28/15D-17C,L-5A,Claw Type,PROVIDED,PROVIDED,PROVIDED,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+621,TRL,TI,103B,Main Line,1 IN 12,220,YES,PTJ,Full Set Provided,6/9/2025,NO,,NO,,7/25/2024,1/25/2025,NO,NO,Not Available,,,3940,2022,S&T PTJ,3/9/2024,22040890,Normal,GLOBE SCOTT,28/15-15B,L-5A,Claw Type,PROVIDED,PROVIDED,PROVIDED,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+622,TRL,TI,105A,Loop Line,1 IN 12,143,NO,Not Provided,Not Provided,,NO,,NO,,11/19/2024,11/19/2025,NO,NO,Not Available,,,56478,2019,S&T PTJ,8/1/2019,19023795,Normal,GLOBE SCOTT,TI/1004-28/26,L-7A,NA,NA,NA,NA,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+623,TRL,TI,105B,Main Line,1 IN 12,220,YES,PTJ,Partially Provided,7/6/2025,NO,,NO,,1/11/2024,7/11/2024,NO,NO,Not Available,,,3235,2022,S&T PTJ,1/11/2024,22032029,Normal,GLOBE SCOTT,28/22B-24,L-7A,T Type,PROVIDED,PROVIDED,PROVIDED,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+624,TRL,TI,107A,Loop Line,1 IN 12,143,YES,Not Provided,Not Provided,,NO,,NA,,4/24/2025,4/24/2026,NO,NO,Not Available,,,71324,2024,S&T PTJ,4/24/2025,24090030,IP67,GLOBE SCOTT,28/25-27,L-7,NA,NA,NA,NA,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+625,TRL,TI,107B,Main Line,1 IN 12,143,NO,Not Provided,Not Provided,,NO,,NO,,4/10/2024,10/10/2024,NO,NO,Not Available,,,39684,2016,S&T PTJ,11/1/2016,16030517,Normal,GLOBE SCOTT,28/22A-24A,L-7,NA,NA,NA,NA,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+626,TRL,TI,114A,Loop Line,1 IN 12,143,YES,Not Provided,Not Provided,,NO,,NA,,11/18/2024,11/18/2025,NO,NO,Not Available,,,56474,2019,S&T PTJ,1/1/2020,19024076,Normal,GLOBE SCOTT,29/16-18,L-13,NA,NA,NA,NA,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+627,TRL,TI,114B,Main Line,1 IN 12,220,NO,Not Provided,Not Provided,,NO,,NA,,1/27/2025,7/27/2025,NO,NO,Not Available,,,3554,2022,S&T PTJ,1/13/2024,22031958,Normal,GLOBE SCOTT,29/19-21,L-13,T Type,PROVIDED,PROVIDED,PROVIDED,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+628,TRL,TI,112A,Loop Line,1 IN 12,143,NO,Not Provided,Not Provided,,NO,,NA,,11/18/2024,11/18/2025,NO,NO,Not Available,,,39801,2016,S&T PTJ,12/1/2016,16030660,Normal,GLOBE SCOTT,29/17-19,L-14,NA,NA,NA,NA,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+629,TRL,TI,112B,Main Line,1 IN 12,143,YES,Not Provided,Not Provided,,NO,,NO,,9/2/2023,3/2/2024,NO,NO,Not Available,,,56606,2019,S&T PTJ,9/5/2020,19024067,Normal,GLOBE SCOTT,29/20A-22A,L-14,NA,NA,NA,NA,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+630,TRL,TI,110A,Main Line,1 IN 12,220,NO,Not Provided,Not Provided,,NO,,NA,,1/20/2024,7/20/2024,NO,NO,Not Available,,,3550,2022,S&T PTJ,1/20/2024,22040047,Normal,GLOBE SCOTT,29/25-25B,L-16A,T Type,PROVIDED,PROVIDED,PROVIDED,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+631,TRL,TI,110B,Main Line,1 IN 12,220,NO,Not Provided,Not Provided,,NO,,NA,,1/27/2025,7/27/2025,NO,NO,Not Available,,,3555,2022,S&T PTJ,1/18/2024,22040374,Normal,GLOBE SCOTT,29/28-30,L-16A,T Type,PROVIDED,PROVIDED,PROVIDED,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+632,TRL,TI,120A,Main Line,1 IN 12,220,NO,Not Provided,Not Provided,,NO,,NO,,1/27/2025,7/27/2025,NO,NO,Not Available,,,7142,2024,S&T PTJ,10/18/2024,24041151,IP67,GLOBE SCOTT,29/9A-11A,L-12,T Type,PROVIDED,PROVIDED,PROVIDED,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+633,TRL,TI,120B,Main Line,1 IN 12,143,NO,,,,,,,,1/27/2025,7/27/2025,NO,NO,Not Available,,,56473,2019,S&T PTJ,8/8/2024,19023903,Normal,GLOBE SCOTT,29/15A-17A,L-12,NA,NA,NA,NA,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+634,TRL,TI,118,Loop Line,1 IN 12,143,YES,Not Provided,Not Provided,,NO,,NO,,1/27/2025,1/27/2026,NO,NO,Not Available,,,45043,2017,S&T PTJ,6/1/2018,2016-1/87784,Normal,ELGI ELECTRICALS,29/13A-15A,L-15,NA,NA,NA,NA,NON-RDSO,1,11/1/2008,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+635,TRL,TI,116A,Loop Line,1 IN 12,220,YES,Not Provided,Not Provided,,NO,,NO,,1/27/2025,1/27/2026,NO,NO,Not Available,,,45054,2017,S&T PTJ,6/1/2018,16101282,Normal,GLOBE SCOTT,29/17A-TI/1003,L-15,NA,NA,NA,NA,NON-RDSO,1,11/1/2008,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+636,TRL,TI,116B,Loop Line,1 IN 12,143,YES,Not Provided,Not Provided,,NO,,NA,,10/26/2024,10/26/2025,NO,NO,Not Available,,,,,S&T PTJ,10/26/2024,,,,29/35-37,L-20A,T Type,PROVIDED,PROVIDED,PROVIDED,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+637,TRL,TI,108A,Main Line,1 IN 8 1/2,220,NO,Not Provided,Not Provided,,NO,,NA,,2/12/2025,8/12/2025,NO,NO,Not Available,,,,,S&T PTJ,10/22/2024,,,,1/30/2003,L-20A,T Type,PROVIDED,PROVIDED,PROVIDED,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+638,TRL,TI,108B,Main Line,1 IN 8 1/2,220,NO,Not Provided,Not Provided,,NO,,NA,,2/12/2025,8/12/2025,NO,NO,Not Available,,,,,S&T PTJ,10/24/2024,,,,3/30/2005,L-22,T Type,PROVIDED,PROVIDED,PROVIDED,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+639,TRL,TI,106A,Main Line,1 IN 12,220,YES,PTJ,Full Set Provided,6/10/2025,NO,,NO,,10/25/2024,4/25/2025,NO,NO,Not Available,,,7141,2024,S&T PTJ,10/25/2024,24041154,IP67,GLOBE SCOTT,3/30/2005,L-22,T Type,PROVIDED,PROVIDED,PROVIDED,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+640,TRL,TI,106B,Main Line,1 IN 12,220,YES,PTJ,Full Set Provided,6/7/2025,NO,,NO,,2/12/2025,8/12/2025,NO,NO,Not Available,,,39416,2016,S&T PTJ,12/1/2016,16020516,Normal,GLOBE SCOTT,4/30/2007,L-23,NA,NA,NA,NA,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+641,TRL,TI,104A,Loop Line,1 IN 12,143,NO,Not Provided,Not Provided,,NO,,NO,,2/12/2025,2/12/2026,NO,NO,Not Available,,,7111,2024,S&T PTJ,10/11/2024,24041112,IP67,GLOBE SCOTT,30/7A-9A,L-23,T Type,PROVIDED,PROVIDED,PROVIDED,NON-RDSO,1,N/A,N/A,N/A,N/A,N/A,N/A,N/A,N/A,Double End Point,YES
+641,TRL,TI,104B,Main Line,1 IN 12,220,YES,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+641,TRL,TI,102A,Main Line,1 IN 12,220,NO,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+641,TRL,TI,102B,Main Line,1 IN 12,220,NO,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,

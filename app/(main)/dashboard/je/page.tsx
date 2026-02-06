@@ -55,7 +55,7 @@ export default function JEDashboard() {
                     className="section-title"
                     style={{ justifyContent: "space-between" }}
                 >
-                    My Work Reports
+                    Technicians Log Book
                     <button
                         className="btn btn-primary btn-sm"
                         onClick={() => router.push('/work-report')}
@@ -121,14 +121,14 @@ export default function JEDashboard() {
 
             <div className="card">
                 <div className="section-title">
-                    My Failure Reports (Complaints)
+                    Failure Reports
                 </div>
                 <div className="alert alert-info" style={{ marginBottom: '20px', fontSize: '13px' }}>
-                    💡 Complaints are automatically generated when you report ANY failure (except "No Failures" status).
+                    💡 Failures are automatically generated when you report ANY failure (except "No Failures" status).
                 </div>
                 <div className="table-container">
                     {complaintsLoading ? (
-                        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)' }}>Loading complaints...</div>
+                        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)' }}>Loading failure reports...</div>
                     ) : (
                         <table>
                             <thead>
@@ -177,7 +177,7 @@ export default function JEDashboard() {
                                         </td>
                                     </tr>
                                 )) : (
-                                    <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--muted)' }}>No failure reports yet.</td></tr>
+                                    <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--muted)' }}>No failures reported yet.</td></tr>
                                 )}
                             </tbody>
                         </table>

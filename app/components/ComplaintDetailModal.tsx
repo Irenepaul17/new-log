@@ -114,7 +114,7 @@ export default function ComplaintDetailModal({ complaint, onClose }: ComplaintDe
                             color: '#2563eb',
                             marginBottom: '8px'
                         }}>
-                            Complaint Details
+                            Failure Details
                         </h2>
                         <div style={{
                             display: 'inline-block',
@@ -168,9 +168,9 @@ export default function ComplaintDetailModal({ complaint, onClose }: ComplaintDe
                         marginBottom: '20px'
                     }}>
                         {/* Complaint Information */}
-                        {renderInfoBox('Complaint Information', (
+                        {renderInfoBox('Failure Information', (
                             <>
-                                {renderField('Complaint ID', complaint.id ? complaint.id.substring(0, 12) : 'N/A')}
+                                {renderField('Failure ID', complaint.id ? complaint.id.substring(0, 12) : 'N/A')}
                                 {renderField('Date Raised', formatDate(complaint.date))}
                                 {renderField('Created Date', formatDate(complaint.createdAt))}
                                 {renderField('Raised By', complaint.authorName)}
@@ -238,7 +238,7 @@ export default function ComplaintDetailModal({ complaint, onClose }: ComplaintDe
                             <div>
                                 <div style={{ fontWeight: 600, marginBottom: '4px', color: '#92400e' }}>Pending Resolution</div>
                                 <div style={{ fontSize: '13px', color: '#92400e' }}>
-                                    This complaint is awaiting resolution by SSE or JE.
+                                    This failure is awaiting resolution by SSE or JE.
                                 </div>
                             </div>
                         </div>

@@ -15,7 +15,7 @@ export default function ComplaintPage() {
         }
 
         // Mock submission logic
-        alert('Complaint raised successfully!');
+        alert('Failure raised successfully!');
 
         // In a real app, we would post to an API here
         // For now, we just redirect back to a dashboard (simulating role-based return)
@@ -26,11 +26,11 @@ export default function ComplaintPage() {
     return (
         <div className="screen active" style={{ display: 'block' }}>
             <div className="alert alert-info">
-                <strong>RESOLUTION PROCESS:</strong> Your complaint will be assigned to <strong>ADSTE Sunita Sharma</strong>.
+                <strong>RESOLUTION PROCESS:</strong> Your failure report will be assigned to <strong>ADSTE Sunita Sharma</strong>.
             </div>
 
             <div className="card" style={{ maxWidth: '800px', margin: '0 auto' }}>
-                <div className="section-title">Raise New Complaint</div>
+                <div className="section-title">Raise New Failure</div>
 
                 <div className="input-group">
                     <label>Category *</label>
@@ -81,7 +81,7 @@ export default function ComplaintPage() {
                 </div>
 
                 <div style={{ display: 'flex', gap: '12px', marginTop: '32px' }}>
-                    <button className="btn btn-primary" onClick={handleSubmit} style={{ flex: 2 }}>SUBMIT COMPLAINT</button>
+                    <button className="btn btn-primary" onClick={handleSubmit} style={{ flex: 2 }}>SUBMIT FAILURE</button>
                     <button className="btn btn-outline" onClick={() => router.back()} style={{ flex: 1 }}>Cancel</button>
                 </div>
             </div>

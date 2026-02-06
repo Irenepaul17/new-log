@@ -17,13 +17,16 @@ export default function SSEDashboard() {
     const [viewingReport, setViewingReport] = useState<WorkReport | null>(null);
     const [viewingComplaint, setViewingComplaint] = useState<Complaint | null>(null);
     const [isAssetModalOpen, setIsAssetModalOpen] = useState(false);
-    const [assetStats, setAssetStats] = useState({ ei: 0, points: 0, signals: 0, trackCircuits: 0 });
+    const [assetStats, setAssetStats] = useState({
+        ei: 0, points: 0, signals: 0, trackCircuits: 0,
+        recent: { ei: 0, points: 0, signals: 0, trackCircuits: 0 }
+    });
 
     useEffect(() => {
         fetch('/api/assets/stats')
             .then(res => res.json())
             .then(data => {
-                setAssetStats(prev => ({ ...prev, ...data }));
+                setAssetStats(data);
             })
             .catch(err => console.error("Failed to load asset stats", err));
     }, []);
@@ -57,10 +60,63 @@ export default function SSEDashboard() {
         !!currentUser // enabled
     );
 
+    // ... handle logout or other effects if any
+
     if (!currentUser) return null;
+
+    const renderAssetCard = (title: string, count: number, recentCount: number, color: string, bgColor: string, borderColor: string) => (
+        <div style={{
+            background: bgColor,
+            border: `1px solid ${borderColor}`,
+            borderRadius: '12px',
+            padding: '20px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+            position: 'relative'
+        }}>
+            {recentCount > 0 && (
+                <div style={{
+                    position: 'absolute',
+                    top: '-10px',
+                    right: '-10px',
+                    background: color,
+                    color: 'white',
+                    padding: '4px 10px',
+                    borderRadius: '20px',
+                    fontSize: '11px',
+                    fontWeight: '700',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                    animation: 'pulse 2s infinite'
+                }}>
+                    +{recentCount} NEW
+                </div>
+            )}
+            <div style={{ fontSize: '36px', fontWeight: '800', color: color, lineHeight: 1, marginBottom: '8px' }}>
+                {count}
+            </div>
+            <div style={{ fontSize: '14px', color: color, fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                {title}
+            </div>
+            {recentCount > 0 && (
+                <div style={{ fontSize: '11px', color: color, marginTop: '5px', opacity: 0.8 }}>
+                    {recentCount} added in last 24h
+                </div>
+            )}
+        </div>
+    );
 
     return (
         <div className="screen active" style={{ display: "block" }}>
+            <style jsx>{`
+                @keyframes pulse {
+                    0% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
+                    100% { transform: scale(1); }
+                }
+            `}</style>
             <div className="alert alert-info">
                 <strong>SSE ({currentUser.name}) DASHBOARD:</strong> Authority over JE & Technicians in your section.
             </div>
@@ -79,87 +135,11 @@ export default function SSEDashboard() {
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px' }}>
-
-                    {/* EI Assets */}
-                    <div style={{
-                        background: '#f0f9ff',
-                        border: '1px solid #bae6fd',
-                        borderRadius: '12px',
-                        padding: '20px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-                    }}>
-                        <div style={{ fontSize: '36px', fontWeight: '800', color: '#0284c7', lineHeight: 1, marginBottom: '8px' }}>
-                            {assetStats.ei}
-                        </div>
-                        <div style={{ fontSize: '14px', color: '#0369a1', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                            EI Assets
-                        </div>
-                    </div>
-
-                    {/* Points */}
-                    <div style={{
-                        background: '#fdf2f8',
-                        border: '1px solid #fbcfe8',
-                        borderRadius: '12px',
-                        padding: '20px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-                    }}>
-                        <div style={{ fontSize: '36px', fontWeight: '800', color: '#db2777', lineHeight: 1, marginBottom: '8px' }}>
-                            {assetStats.points}
-                        </div>
-                        <div style={{ fontSize: '14px', color: '#be185d', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                            Points
-                        </div>
-                    </div>
-
-                    {/* Signals */}
-                    <div style={{
-                        background: '#fefce8',
-                        border: '1px solid #fde047',
-                        borderRadius: '12px',
-                        padding: '20px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-                    }}>
-                        <div style={{ fontSize: '36px', fontWeight: '800', color: '#ca8a04', lineHeight: 1, marginBottom: '8px' }}>
-                            {assetStats.signals}
-                        </div>
-                        <div style={{ fontSize: '14px', color: '#a16207', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                            Signals
-                        </div>
-                    </div>
-
-                    {/* Track Circuits */}
-                    <div style={{
-                        background: '#f0fdf4',
-                        border: '1px solid #bbf7d0',
-                        borderRadius: '12px',
-                        padding: '20px',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-                    }}>
-                        <div style={{ fontSize: '36px', fontWeight: '800', color: '#16a34a', lineHeight: 1, marginBottom: '8px' }}>
-                            {assetStats.trackCircuits}
-                        </div>
-                        <div style={{ fontSize: '14px', color: '#15803d', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                            Track Circuits
-                        </div>
-                    </div>
-
+                    {renderAssetCard("EI Assets", assetStats.ei, assetStats.recent.ei, "#0284c7", "#f0f9ff", "#bae6fd")}
+                    {renderAssetCard("Points", assetStats.points, assetStats.recent.points, "#db2777", "#fdf2f8", "#fbcfe8")}
+                    {renderAssetCard("Signals", assetStats.signals, assetStats.recent.signals, "#ca8a04", "#fefce8", "#fde047")}
+                    {renderAssetCard("Track Circuits", assetStats.trackCircuits, assetStats.recent.trackCircuits, "#16a34a", "#f0fdf4", "#bbf7d0")}
+                    {renderAssetCard("Axle Counters", (assetStats as any).axleCounters || 0, (assetStats.recent as any).axleCounters || 0, "#6366f1", "#eef2ff", "#c7d2fe")}
                 </div>
             </div>
 
@@ -170,7 +150,7 @@ export default function SSEDashboard() {
             </div>
 
             <div className="card">
-                <div className="section-title">Subordinate Work Reports</div>
+                <div className="section-title">Technicians Log Book</div>
                 <div className="table-container">
                     {reportsLoading ? (
                         <div style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)' }}>Loading reports...</div>
@@ -221,13 +201,13 @@ export default function SSEDashboard() {
             </div>
 
             <div className="card">
-                <div className="section-title">Team Failure Reports (Complaints)</div>
+                <div className="section-title">Failure Reports</div>
                 <div className="alert alert-info" style={{ marginBottom: '20px', fontSize: '13px' }}>
-                    💡 Complaints are automatically generated from failure reports. You can resolve complaints reported by your team.
+                    💡 Failures are automatically generated from failure reports. You can resolve failures reported by your team.
                 </div>
                 <div className="table-container">
                     {complaintsLoading ? (
-                        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)' }}>Loading complaints...</div>
+                        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)' }}>Loading failure reports...</div>
                     ) : (
                         <table>
                             <thead>

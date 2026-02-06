@@ -34,8 +34,8 @@ export function ResolutionModal({ complaint, onClose, onResolve }: ResolutionMod
             });
             onClose();
         } catch (error) {
-            console.error('Failed to resolve complaint:', error);
-            alert('Failed to resolve complaint. Please try again.');
+            console.error('Failed to resolve failure:', error);
+            alert('Failed to resolve failure. Please try again.');
         } finally {
             setIsSubmitting(false);
         }
@@ -72,7 +72,7 @@ export function ResolutionModal({ complaint, onClose, onResolve }: ResolutionMod
                     alignItems: 'center'
                 }}>
                     <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 600 }}>
-                        Resolve Complaint
+                        Resolve Failure
                     </h2>
                     <button
                         onClick={onClose}
@@ -221,7 +221,7 @@ export function ResolutionModal({ complaint, onClose, onResolve }: ResolutionMod
                                 opacity: isSubmitting ? 0.6 : 1
                             }}
                         >
-                            {isSubmitting ? 'Resolving...' : 'Resolve Complaint'}
+                            {isSubmitting ? 'Resolving...' : 'Resolve Failure'}
                         </button>
                     </div>
                 </form>

@@ -46,11 +46,11 @@ export default function DSTEDashboard() {
     return (
         <div className="screen active" style={{ display: "block" }}>
             <div className="alert alert-danger">
-                <strong>DSTE ({currentUser.name}) MONITORING DASHBOARD:</strong> View-only access to monitor all work reports and complaints. Complaint resolution is handled by SSE/JE.
+                <strong>DSTE ({currentUser.name}) MONITORING DASHBOARD:</strong> View-only access to monitor all work reports and failures. Failure resolution is handled by SSE/JE.
             </div>
 
             <div className="card">
-                <div className="section-title">All Team Reports</div>
+                <div className="section-title">Technicians Log Book</div>
                 <div className="table-container">
                     {reportsLoading ? (
                         <div style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)' }}>Loading reports...</div>
@@ -93,13 +93,13 @@ export default function DSTEDashboard() {
             </div>
 
             <div className="card">
-                <div className="section-title">All Failure Reports (Complaints)</div>
+                <div className="section-title">Failure Reports</div>
                 <div className="alert alert-info" style={{ marginBottom: '20px', fontSize: '13px' }}>
-                    💡 Monitoring view only. Complaints are resolved by SSE/JE personnel.
+                    💡 Monitoring view only. Failures are resolved by SSE/JE personnel.
                 </div>
                 <div className="table-container">
                     {complaintsLoading ? (
-                        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)' }}>Loading complaints...</div>
+                        <div style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)' }}>Loading failure reports...</div>
                     ) : (
                         <table>
                             <thead>
@@ -137,7 +137,7 @@ export default function DSTEDashboard() {
                                         </td>
                                     </tr>
                                 )) : (
-                                    <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--muted)' }}>No failure reports yet.</td></tr>
+                                    <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--muted)' }}>No failures reported yet.</td></tr>
                                 )}
                             </tbody>
                         </table>

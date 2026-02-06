@@ -11,20 +11,15 @@ export default function AssetSelectionModal({ isOpen, onClose }: AssetSelectionM
     if (!isOpen) return null;
 
     const assets = [
-        { name: "Point", icon: "" },
-        { name: "Signal", icon: "" },
-        { name: "EI", icon: "" },
-        { name: "Track Circuit", icon: "" },
+        { name: "Point", path: "/dashboard/assets/point" },
+        { name: "Signal", path: "/dashboard/assets/signal" },
+        { name: "EI", path: "/dashboard/assets/ei" },
+        { name: "Track Circuit", path: "/dashboard/assets/track-circuit" },
+        { name: "Axle Counter", path: "/dashboard/assets/axle-counter" },
     ];
 
-    const handleSelect = (assetName: string) => {
-        if (assetName === "EI") {
-            window.location.href = "/dashboard/assets/ei";
-            return;
-        }
-        // Placeholder action for now
-        alert(`You selected: ${assetName}. Details page coming soon!`);
-        onClose();
+    const handleSelect = (assetPath: string) => {
+        window.location.href = assetPath;
     };
 
     return (
@@ -74,7 +69,7 @@ export default function AssetSelectionModal({ isOpen, onClose }: AssetSelectionM
                     {assets.map((asset) => (
                         <button
                             key={asset.name}
-                            onClick={() => handleSelect(asset.name)}
+                            onClick={() => handleSelect(asset.path)}
                             className="btn btn-outline"
                             style={{
                                 display: 'flex',

@@ -238,18 +238,24 @@ export default function MainLayout({
                 <div style={{ padding: '40px', minHeight: 'calc(100vh - 140px)' }}>
                     {children}
                 </div>
-                {/* Version Footer */}
-                <footer style={{
-                    padding: '16px 40px',
-                    borderTop: '1px solid var(--border)',
-                    background: 'var(--bg-secondary)',
-                    textAlign: 'center',
-                    fontSize: '12px',
-                    color: 'var(--muted)',
-                    marginTop: 'auto'
+
+                {/* Floating Version Tag in Bottom Left */}
+                <div style={{
+                    position: 'fixed',
+                    bottom: '5px',
+                    left: '5px',
+                    background: 'rgba(0, 0, 0, 0.05)',
+                    padding: '2px 6px',
+                    borderRadius: '4px',
+                    fontSize: '10px',
+                    color: '#64748b',
+                    zIndex: 9999,
+                    pointerEvents: 'none',
+                    fontFamily: 'monospace',
+                    fontWeight: 500
                 }}>
-                    S&T Digital Log Book v0.1.1 | © 2026 Indian Railways
-                </footer>
+                    Version 1.1.2
+                </div>
             </main>
         </>
     );

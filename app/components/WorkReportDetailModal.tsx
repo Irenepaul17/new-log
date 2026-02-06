@@ -122,7 +122,7 @@ export default function WorkReportDetailModal({ report, onClose }: WorkReportDet
                             color: '#2563eb',
                             marginBottom: '8px'
                         }}>
-                            Work Report Details
+                            Technician's Log Book Details
                         </h2>
                         <div style={{
                             display: 'inline-block',

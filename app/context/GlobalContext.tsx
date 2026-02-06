@@ -135,7 +135,7 @@ export function GlobalProvider({ children }: { children: ReactNode }) {
                 setComplaints(prev => [savedComplaint, ...prev]);
             }
         } catch (e) {
-            console.error("Failed to add complaint", e);
+            console.error("Failed to add failure", e);
         }
     };
 
@@ -163,7 +163,7 @@ export function GlobalProvider({ children }: { children: ReactNode }) {
                 setComplaints(prev => prev.map(c => c.id === id ? updatedComplaint : c));
             }
         } catch (e) {
-            console.error("Failed to resolve complaint", e);
+            console.error("Failed to resolve failure", e);
         }
     };
 
