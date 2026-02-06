@@ -3,7 +3,6 @@ import SignalAssetModel from '../app/models/SignalAsset';
 import PointAssetModel from '../app/models/PointAsset';
 import EIAssetModel from '../app/models/EIAsset';
 import TrackCircuitAssetModel from '../app/models/TrackCircuitAsset';
-import AxleCounterAssetModel from '../app/models/AxleCounterAsset';
 import * as dotenv from 'dotenv';
 import path from 'path';
 
@@ -43,10 +42,8 @@ async function run() {
             result = await EIAssetModel.insertMany(assetsToImport);
         } else if (type === 'track-circuit') {
             result = await TrackCircuitAssetModel.insertMany(assetsToImport);
-        } else if (type === 'axle-counter') {
-            result = await AxleCounterAssetModel.insertMany(assetsToImport);
         } else {
-            throw new Error('Invalid type. Use --type=signal, --type=point, --type=ei, --type=track-circuit, or --type=axle-counter');
+            throw new Error('Invalid type. Use --type=signal, --type=point, --type=ei, or --type=track-circuit');
         }
 
         console.log(`Successfully imported ${result.length} assets!`);
