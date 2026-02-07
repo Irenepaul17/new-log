@@ -8,6 +8,7 @@ import ComplaintDetailModal from "@/app/components/ComplaintDetailModal";
 import { Complaint, WorkReport } from "@/app/types";
 import { usePaginatedData } from '@/app/hooks/usePaginatedData';
 import { PaginationControls } from '@/app/components/PaginationControls';
+import { SOSButton } from "@/app/components/SOSButton";
 
 import AssetSelectionModal from "@/app/components/AssetSelectionModal";
 
@@ -142,7 +143,8 @@ export default function SSEDashboard() {
                 </div>
             </div>
 
-            <div style={{ marginBottom: '20px', display: 'flex', gap: '10px' }}>
+            <div style={{ marginBottom: '20px', display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <SOSButton />
                 <a href="/work-report" className="btn btn-primary" style={{ display: 'inline-block', textDecoration: 'none' }}>
                     + Submit Your Work Log
                 </a>

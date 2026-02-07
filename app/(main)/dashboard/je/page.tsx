@@ -9,6 +9,7 @@ import WorkReportDetailModal from "@/app/components/WorkReportDetailModal";
 import ComplaintDetailModal from "@/app/components/ComplaintDetailModal";
 import { usePaginatedData } from '@/app/hooks/usePaginatedData';
 import { PaginationControls } from '@/app/components/PaginationControls';
+import { SOSButton } from "@/app/components/SOSButton";
 
 export default function JEDashboard() {
     const { currentUser, resolveComplaint } = useGlobal(); // Removed reports/complaints from global
@@ -56,12 +57,15 @@ export default function JEDashboard() {
                     style={{ justifyContent: "space-between" }}
                 >
                     Technicians Log Book
-                    <button
-                        className="btn btn-primary btn-sm"
-                        onClick={() => router.push('/work-report')}
-                    >
-                        + START LOG BOOK
-                    </button>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <SOSButton />
+                        <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => router.push('/work-report')}
+                        >
+                            + START LOG BOOK
+                        </button>
+                    </div>
                 </div>
                 <div className="table-container">
                     {reportsLoading ? (

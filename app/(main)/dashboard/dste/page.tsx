@@ -7,6 +7,7 @@ import ComplaintDetailModal from "@/app/components/ComplaintDetailModal";
 import { WorkReport, Complaint } from "@/app/types";
 import { usePaginatedData } from '@/app/hooks/usePaginatedData';
 import { PaginationControls } from '@/app/components/PaginationControls';
+import { SOSAlertListener } from "@/app/components/SOSAlertListener";
 
 export default function DSTEDashboard() {
     const { currentUser } = useGlobal(); // Removed reports/complaints from global
@@ -48,6 +49,8 @@ export default function DSTEDashboard() {
             <div className="alert alert-danger">
                 <strong>DSTE ({currentUser.name}) MONITORING DASHBOARD:</strong> View-only access to monitor all work reports and failures. Failure resolution is handled by SSE/JE.
             </div>
+
+            <SOSAlertListener />
 
             <div className="card">
                 <div className="section-title">Technicians Log Book</div>
