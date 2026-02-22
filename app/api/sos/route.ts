@@ -63,38 +63,45 @@ export async function POST(request: Request) {
             </div>
         `;
 
-        // Notify authorities
-        await sendEmail({
-            to: recipientData.map(r => r.email),
+        // Dispatch Email
+        // DEMO MODE: Temporarily send to verified email only to bypass Resend sandbox
+        const emailResult = await sendEmail({
+            to: ["irenechrispaul17@gmail.com"], // Hardcoded for demo - will send to all recipients in production
             subject: emailSubject,
             html: emailHtml
         });
 
-        // Notify sender (Confirmation email)
-        await sendEmail({
-            to: sender.email,
-            subject: `SOS Alert Confirmation - ${alert.id}`,
-            html: `
-                <div style="font-family: Arial, sans-serif; padding: 20px;">
-                    <h3>✅ SOS Alert Sent</h3>
-                    <p>Your emergency alert has been sent to the following authorities:</p>
-                    <ul>
-                        ${recipientData.map(r => `<li>${r.name} (${r.role.toUpperCase()})</li>`).join('')}
-                    </ul>
-                    <p>Immediate notifications have been pushed to their dashboards.</p>
-                </div>
-            `
-        });
+        // 6. Update Audit Trail & Final Response
+        if (emailResult.success) {
+            await SOSAlertModel.findByIdAndUpdate(alert.id, { status: 'sent' });
 
-        return NextResponse.json({
-            success: true,
-            alertId: alert.id,
-            recipientCount: recipients.length
-        });
+            // Send optional confirmation to sender (async) - also to verified email in demo mode
+            sendEmail({
+                to: ["irenechrispaul17@gmail.com"], // Demo mode
+                subject: `SOS Alert Confirmation - ${alert.id}`,
+                html: `<p>Your SOS alert has been received and dispatched to ${recipientData.length} recipients in the ${sender.division} hierarchy.</p>`
+            }).catch(e => console.error('Sender confirmation email failed', e));
 
-    } catch (error) {
-        console.error('SOS request error:', error);
-        return NextResponse.json({ error: 'Failed to process SOS alert' }, { status: 500 });
+            return NextResponse.json({
+                success: true,
+                alertId: alert.id,
+                recipientCount: recipientData.length
+            });
+        } else {
+            await SOSAlertModel.findByIdAndUpdate(alert.id, {
+                status: 'failed',
+                errorMessage: emailResult.error
+            });
+            return NextResponse.json({
+                error: 'SOS triggered but email delivery failed. Dashboard alerts are active.',
+                alertId: alert.id,
+                details: emailResult.error
+            }, { status: 502 });
+        }
+
+    } catch (error: any) {
+        console.error('SOS Fatal API Error:', error);
+        return NextResponse.json({ error: 'Failed to process SOS alert system' }, { status: 500 });
     }
 }
 

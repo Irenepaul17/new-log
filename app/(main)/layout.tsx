@@ -3,7 +3,7 @@
 import Link from "next/link";
 import React, { useState, useRef, useEffect } from "react";
 import { useGlobal } from "@/app/context/GlobalContext";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 export default function MainLayout({
     children,
@@ -12,8 +12,41 @@ export default function MainLayout({
 }>) {
     const { currentUser, logout } = useGlobal();
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [logsExpanded, setLogsExpanded] = useState(false);
+    const [failuresExpanded, setFailuresExpanded] = useState(false);
+    const [counts, setCounts] = useState({ workLogs: 0, failures: 0 });
     const dropdownRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const currentMonth = searchParams.get('month');
+
+    // Fetch Sidebar Counts
+    useEffect(() => {
+        if (!currentUser) return;
+
+        const fetchCounts = async () => {
+            try {
+                const res = await fetch(`/api/stats/sidebar-counts?userId=${currentUser.id}&role=${currentUser.role}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setCounts(data);
+                }
+            } catch (e) {
+                console.error("Failed to fetch sidebar counts", e);
+            }
+        };
+
+        fetchCounts();
+        const interval = setInterval(fetchCounts, 60000); // Update every minute
+        return () => clearInterval(interval);
+    }, [currentUser]);
+
+    // Auto-expand and highlight logic
+    useEffect(() => {
+        if (pathname.startsWith('/logs')) setLogsExpanded(true);
+        if (pathname.startsWith('/failures')) setFailuresExpanded(true);
+    }, [pathname]);
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -26,11 +59,25 @@ export default function MainLayout({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    const generateLastMonths = (count = 12) => {
+        const months = [];
+        const now = new Date();
+        for (let i = 0; i < count; i++) {
+            const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const monthStr = `${year}-${month}`;
+            const label = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+            months.push({ value: monthStr, label });
+        }
+        return months;
+    };
+
+    const monthLinks = generateLastMonths();
+
     // Role-based navigation items
     const getDashboardLink = () => {
         if (!currentUser) return null;
-
-        // Only show user's own dashboard
         const dashboardMap: Record<string, { href: string; label: string }> = {
             'sr-dste': { href: '/dashboard/sr-dste', label: 'Sr. DSTE Dashboard' },
             'dste': { href: '/dashboard/dste', label: 'DSTE Dashboard' },
@@ -39,17 +86,145 @@ export default function MainLayout({
             'je': { href: '/dashboard/je', label: 'JE Dashboard' },
             'technician': { href: '/dashboard/je', label: 'Dashboard' },
         };
-
         return dashboardMap[currentUser.role];
     };
 
-    const canManageUsers = currentUser && ['sr-dste', 'dste', 'adste'].includes(currentUser.role);
-
     const dashboardLink = getDashboardLink();
+    if (!currentUser) return null;
 
     return (
-        <>
-            <main style={{ width: '100%', minHeight: '100vh' }}>
+        <div style={{ display: 'flex', width: '100%', minHeight: '100vh' }}>
+            {/* Sidebar */}
+            <aside className="sidebar">
+                <div className="brand">
+                    <span style={{ fontSize: '24px' }}>📑</span>
+                    Log Monitor
+                </div>
+
+                <div style={{ flex: 1, overflowY: 'auto', paddingRight: '4px' }}>
+                    <Link
+                        href={dashboardLink?.href || '/'}
+                        className={`nav-item ${pathname.includes('/dashboard') ? 'active' : ''}`}
+                    >
+                        <span>🏠</span> Dashboard
+                    </Link>
+
+                    {/* Work Logs Section */}
+                    <div style={{ marginTop: '20px' }}>
+                        <button
+                            className="nav-item"
+                            onClick={() => setLogsExpanded(!logsExpanded)}
+                            style={{ justifyContent: 'space-between' }}
+                        >
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <span>📋</span> Work Logs
+                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {counts.workLogs > 0 && (
+                                    <span style={{
+                                        background: 'var(--primary-soft)',
+                                        color: 'var(--primary)',
+                                        fontSize: '11px',
+                                        fontWeight: 700,
+                                        padding: '2px 8px',
+                                        borderRadius: '10px'
+                                    }}>
+                                        {counts.workLogs}
+                                    </span>
+                                )}
+                                <span style={{
+                                    transform: logsExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                                    transition: 'transform 0.2s',
+                                    fontSize: '10px'
+                                }}>▶</span>
+                            </div>
+                        </button>
+
+                        {logsExpanded && (
+                            <div style={{ marginLeft: '12px', paddingLeft: '12px', borderLeft: '1px solid var(--border)' }}>
+                                {monthLinks.map(m => (
+                                    <Link
+                                        key={m.value}
+                                        href={`/logs?month=${m.value}`}
+                                        className={`nav-item ${pathname === '/logs' && currentMonth === m.value ? 'active' : ''}`}
+                                        style={{ fontSize: '13px', padding: '8px 12px' }}
+                                    >
+                                        {m.label}
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Failures Section */}
+                    <div style={{ marginTop: '8px' }}>
+                        <button
+                            className="nav-item"
+                            onClick={() => setFailuresExpanded(!failuresExpanded)}
+                            style={{ justifyContent: 'space-between' }}
+                        >
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <span>⚠️</span> Failure Reports
+                            </span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                {counts.failures > 0 && (
+                                    <span style={{
+                                        background: '#fee2e2',
+                                        color: '#ef4444',
+                                        fontSize: '11px',
+                                        fontWeight: 700,
+                                        padding: '2px 8px',
+                                        borderRadius: '10px'
+                                    }}>
+                                        {counts.failures}
+                                    </span>
+                                )}
+                                <span style={{
+                                    transform: failuresExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                                    transition: 'transform 0.2s',
+                                    fontSize: '10px'
+                                }}>▶</span>
+                            </div>
+                        </button>
+
+                        {failuresExpanded && (
+                            <div style={{ marginLeft: '12px', paddingLeft: '12px', borderLeft: '1px solid var(--border)' }}>
+                                {monthLinks.map(m => (
+                                    <Link
+                                        key={m.value}
+                                        href={`/failures?month=${m.value}`}
+                                        className={`nav-item ${pathname === '/failures' && currentMonth === m.value ? 'active' : ''}`}
+                                        style={{ fontSize: '13px', padding: '8px 12px' }}
+                                    >
+                                        {m.label}
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <Link
+                        href="/hierarchy"
+                        className={`nav-item ${pathname === '/hierarchy' ? 'active' : ''}`}
+                        style={{ marginTop: '20px' }}
+                    >
+                        <span>👥</span> My Section
+                    </Link>
+                </div>
+
+                <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid var(--border)' }}>
+                    <button
+                        onClick={logout}
+                        className="nav-item"
+                        style={{ color: 'var(--danger)' }}
+                    >
+                        <span>🚪</span> Logout
+                    </button>
+                </div>
+            </aside>
+
+            {/* Main Content Area */}
+            <main className="main-wrapper" style={{ padding: 0 }}>
                 <header style={{
                     padding: '20px 40px',
                     borderBottom: '1px solid var(--border)',
@@ -64,36 +239,37 @@ export default function MainLayout({
                     <h1
                         onClick={() => router.push(dashboardLink?.href || '/')}
                         style={{
-                            fontSize: '24px',
+                            fontSize: '20px',
                             fontWeight: 700,
-                            color: 'var(--primary)',
+                            color: 'var(--text)',
                             margin: 0,
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px'
+                            cursor: 'pointer'
                         }}
                     >
-                        <span style={{ fontSize: '28px' }}>📑</span>
-                        S&T Digital Log
+                        {pathname.startsWith('/logs') ? 'Work Logs' :
+                            pathname.startsWith('/failures') ? 'Failure Reports' :
+                                pathname.includes('/dashboard') ? (getDashboardLink()?.label || 'Dashboard') :
+                                    pathname.includes('/hierarchy') ? 'My Section / Team' :
+                                        'Log Monitor'}
+                        {currentMonth && <span style={{ color: 'var(--muted)', fontWeight: 400, marginLeft: '12px' }}>— {monthLinks.find(m => m.value === currentMonth)?.label}</span>}
                     </h1>
+
                     <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
                         <div style={{ textAlign: "right" }}>
                             <div style={{ fontWeight: 600, fontSize: "14px" }}>
-                                {currentUser ? currentUser.name : "Guest"}
+                                {currentUser.name}
                             </div>
                             <div style={{ fontSize: "12px", color: "var(--muted)" }}>
-                                {currentUser ? currentUser.sub : "Please Login"}
+                                {currentUser.sub}
                             </div>
                         </div>
 
-                        {/* Avatar with Dropdown */}
                         <div ref={dropdownRef} style={{ position: 'relative' }}>
                             <button
                                 onClick={() => setDropdownOpen(!dropdownOpen)}
                                 style={{
-                                    width: "40px",
-                                    height: "40px",
+                                    width: "36px",
+                                    height: "36px",
                                     borderRadius: "50%",
                                     background: "var(--primary-soft)",
                                     display: "flex",
@@ -102,148 +278,53 @@ export default function MainLayout({
                                     color: "var(--primary)",
                                     fontWeight: 700,
                                     cursor: "pointer",
-                                    border: 'none',
-                                    transition: 'all 0.2s'
+                                    border: 'none'
                                 }}
                             >
-                                {currentUser ? currentUser.name.charAt(0) : "?"}
+                                {currentUser.name.charAt(0)}
                             </button>
 
-                            {/* Dropdown Menu */}
                             {dropdownOpen && (
                                 <div style={{
                                     position: 'absolute',
-                                    top: '50px',
+                                    top: '45px',
                                     right: 0,
                                     background: 'white',
                                     borderRadius: '12px',
-                                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15)',
+                                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
                                     border: '1px solid var(--border)',
-                                    minWidth: '200px',
+                                    minWidth: '180px',
                                     zIndex: 1000,
                                     overflow: 'hidden'
                                 }}>
                                     <button
-                                        onClick={() => {
-                                            setDropdownOpen(false);
-                                            router.push(dashboardLink?.href || '/');
-                                        }}
-                                        style={{
-                                            width: '100%',
-                                            padding: '12px 16px',
-                                            border: 'none',
-                                            background: 'transparent',
-                                            textAlign: 'left',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '12px',
-                                            fontSize: '14px',
-                                            color: 'var(--text)',
-                                            borderBottom: '1px solid var(--border)',
-                                            transition: 'background 0.2s'
-                                        }}
-                                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg)'}
-                                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                        onClick={() => { setDropdownOpen(false); router.push('/profile'); }}
+                                        className="nav-item"
+                                        style={{ borderRadius: 0, marginBottom: 0, borderBottom: '1px solid var(--border)' }}
                                     >
-                                        <span style={{ fontSize: '18px' }}>🏠</span>
-                                        Dashboard Home
+                                        <span>👤</span> Profile
                                     </button>
-
                                     <button
-                                        onClick={() => {
-                                            setDropdownOpen(false);
-                                            router.push('/profile');
-                                        }}
-                                        style={{
-                                            width: '100%',
-                                            padding: '12px 16px',
-                                            border: 'none',
-                                            background: 'transparent',
-                                            textAlign: 'left',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '12px',
-                                            fontSize: '14px',
-                                            color: 'var(--text)',
-                                            borderBottom: '1px solid var(--border)',
-                                            transition: 'background 0.2s'
-                                        }}
-                                        onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg)'}
-                                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                        onClick={() => { setDropdownOpen(false); logout(); }}
+                                        className="nav-item"
+                                        style={{ borderRadius: 0, marginBottom: 0, color: 'var(--danger)' }}
                                     >
-                                        <span style={{ fontSize: '18px' }}>👤</span>
-                                        View Profile
-                                    </button>
-
-                                    {currentUser && currentUser.role !== 'technician' && (
-                                        <button
-                                            onClick={() => {
-                                                setDropdownOpen(false);
-                                                router.push('/hierarchy');
-                                            }}
-                                            style={{
-                                                width: '100%',
-                                                padding: '12px 16px',
-                                                border: 'none',
-                                                background: 'transparent',
-                                                textAlign: 'left',
-                                                cursor: 'pointer',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: '12px',
-                                                fontSize: '14px',
-                                                color: 'var(--text)',
-                                                borderBottom: '1px solid var(--border)',
-                                                transition: 'background 0.2s'
-                                            }}
-                                            onMouseEnter={(e) => e.currentTarget.style.background = 'var(--bg)'}
-                                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                        >
-                                            <span style={{ fontSize: '18px' }}>👥</span>
-                                            My Section / Team
-                                        </button>
-                                    )}
-                                    <button
-                                        onClick={() => {
-                                            setDropdownOpen(false);
-                                            logout();
-                                        }}
-                                        style={{
-                                            width: '100%',
-                                            padding: '12px 16px',
-                                            border: 'none',
-                                            background: 'transparent',
-                                            textAlign: 'left',
-                                            cursor: 'pointer',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '12px',
-                                            fontSize: '14px',
-                                            color: '#ef4444',
-                                            transition: 'background 0.2s'
-                                        }}
-                                        onMouseEnter={(e) => e.currentTarget.style.background = '#fef2f2'}
-                                        onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-                                    >
-                                        <span style={{ fontSize: '18px' }}>🚪</span>
-                                        Logout
+                                        <span>🚪</span> Logout
                                     </button>
                                 </div>
                             )}
                         </div>
                     </div>
                 </header>
-                <div style={{ padding: '40px', minHeight: 'calc(100vh - 140px)' }}>
+
+                <div style={{ padding: '40px', minHeight: 'calc(100vh - 80px)' }}>
                     {children}
                 </div>
 
-                {/* Floating Version Tag in Bottom Left */}
                 <div style={{
                     position: 'fixed',
                     bottom: '5px',
-                    left: '5px',
+                    right: '5px',
                     background: 'rgba(0, 0, 0, 0.05)',
                     padding: '2px 6px',
                     borderRadius: '4px',
@@ -251,12 +332,11 @@ export default function MainLayout({
                     color: '#64748b',
                     zIndex: 9999,
                     pointerEvents: 'none',
-                    fontFamily: 'monospace',
-                    fontWeight: 500
+                    fontFamily: 'monospace'
                 }}>
-                    Version 1.1.2
+                    Version 1.2.0
                 </div>
             </main>
-        </>
+        </div>
     );
 }

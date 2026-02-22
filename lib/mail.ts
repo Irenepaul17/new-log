@@ -1,32 +1,40 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
-const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
-    secure: process.env.SMTP_SECURE === 'true',
-    auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-    },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function sendEmail({ to, subject, html }: { to: string | string[]; subject: string; html: string }) {
-    if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-        console.warn('⚠️ SMTP credentials not configured. Email NOT sent.');
+    if (!process.env.RESEND_API_KEY) {
+        console.warn('⚠️ RESEND_API_KEY not configured. Email NOT sent.');
         console.log(`To: ${to}\nSubject: ${subject}\nBody: ${html}`);
-        return;
+        return { success: false, error: 'API Key missing' };
     }
 
     try {
-        await transporter.sendMail({
-            from: `"S&T Digital Log System" <${process.env.SMTP_USER}>`,
-            to: Array.isArray(to) ? to.join(', ') : to,
+        const recipients = Array.isArray(to) ? to : [to];
+
+        // Remove duplicates and invalid emails
+        const uniqueRecipients = [...new Set(recipients)].filter(e => e && e.includes('@'));
+
+        if (uniqueRecipients.length === 0) {
+            return { success: false, error: 'No valid recipients' };
+        }
+
+        const data = await resend.emails.send({
+            from: process.env.EMAIL_FROM || 'Log Monitor <alerts@resend.dev>',
+            to: uniqueRecipients,
             subject,
             html,
         });
-        console.log(`✅ Email sent successfully to ${to}`);
-    } catch (error) {
-        console.error('❌ Failed to send email:', error);
-        throw error;
+
+        if (data.error) {
+            console.error('❌ Resend Error:', data.error);
+            return { success: false, error: data.error.message };
+        }
+
+        console.log(`✅ Email sent successfully to ${uniqueRecipients.join(', ')}`);
+        return { success: true, data };
+    } catch (error: any) {
+        console.error('❌ Failed to send email via Resend:', error);
+        return { success: false, error: error.message || 'Unknown error' };
     }
 }

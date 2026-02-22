@@ -27,31 +27,31 @@ export async function GET(request: Request) {
         const role = searchParams.get('role');
         const pageParam = searchParams.get('page');
         const limitParam = searchParams.get('limit');
+        const monthParam = searchParams.get('month'); // YYYY-MM
 
         let query: any = {};
 
+        // Month Filtering Logic
+        if (monthParam) {
+            const [year, month] = monthParam.split('-').map(Number);
+            const start = new Date(year, month - 1, 1);
+            const end = new Date(year, month, 1);
+            query.createdAt = { $gte: start, $lt: end };
+        }
+
         // Apply role-based filtering
         if (role === 'sr-dste' || role === 'dste') {
-            // Sr. DSTE and DSTE can see ALL reports
-            query = {};
-        } else if (role === 'adste') {
-            // ADSTE can see own reports + all subordinates (SSE, JE, technician)
+            // Sr. DSTE and DSTE can see ALL reports (optionally filtered by query)
+        } else if (role === 'adste' || role === 'sse') {
+            // ADSTE/SSE see own + all subordinates
             if (userId) {
                 const subordinateIds = await getAllSubordinateIds(userId);
-                // Include own reports + subordinate reports
-                query = { authorId: { $in: [userId, ...subordinateIds] } };
-            }
-        } else if (role === 'sse') {
-            // SSE can see own reports + JE reports + technician reports
-            if (userId) {
-                const subordinateIds = await getAllSubordinateIds(userId);
-                // Include own reports + subordinate reports
-                query = { authorId: { $in: [userId, ...subordinateIds] } };
+                query.authorId = { $in: [userId, ...subordinateIds] };
             }
         } else if (role === 'je' || role === 'technician') {
-            // JE and technician can only see their own reports
+            // JE/tech see own only
             if (userId) {
-                query = { authorId: userId };
+                query.authorId = userId;
             }
         }
 
@@ -84,9 +84,13 @@ export async function GET(request: Request) {
         const reports = await WorkReportModel.find(query).sort({ createdAt: -1 });
         return NextResponse.json(reports);
 
-    } catch (error) {
-        console.error('Failed to fetch reports:', error);
-        return NextResponse.json({ error: 'Failed to fetch reports' }, { status: 500 });
+    } catch (error: any) {
+        console.error('❌ Failed to fetch reports:', error);
+        return NextResponse.json({
+            error: 'Failed to fetch reports',
+            details: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        }, { status: 500 });
     }
 }
 
@@ -94,6 +98,20 @@ export async function POST(request: Request) {
     try {
         await dbConnect();
         const body = await request.json();
+
+        // Date Validation
+        if (body.date) {
+            const reportDate = new Date(body.date);
+            const today = new Date();
+            const minDate = new Date('2024-01-01');
+
+            if (reportDate > today || reportDate < minDate) {
+                return NextResponse.json({
+                    error: 'Invalid date. Date must be between 2024-01-01 and today.'
+                }, { status: 400 });
+            }
+        }
+
         console.log('Received work report data:', JSON.stringify(body, null, 2));
         const report = await WorkReportModel.create(body);
         console.log('Successfully created report:', report._id);

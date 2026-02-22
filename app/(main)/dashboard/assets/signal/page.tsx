@@ -4,8 +4,14 @@ import { useState, useEffect } from 'react';
 import { SignalAsset, SignalEquipment } from '@/app/types/assets';
 import { usePaginatedData } from '@/app/hooks/usePaginatedData';
 import { PaginationControls } from '@/app/components/PaginationControls';
+import { useGlobal } from '@/app/context/GlobalContext';
 
 export default function SignalAssetsPage() {
+    const { currentUser } = useGlobal();
+    const isOfficer = ['sr-dste', 'dste', 'adste'].includes(currentUser?.role || '');
+    const isSSE = currentUser?.role === 'sse';
+    const isFieldStaff = ['je', 'technician'].includes(currentUser?.role || '');
+
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingAsset, setEditingAsset] = useState<SignalAsset | null>(null);
     const [activeTab, setActiveTab] = useState('basic');
@@ -76,6 +82,33 @@ export default function SignalAssetsPage() {
         e.preventDefault();
 
         try {
+            if (isFieldStaff) {
+                // JE / Technician submits a request for approval
+                const response = await fetch('/api/assets/signal/request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        assetId: editingAsset?.id || null,
+                        assetType: 'signal',
+                        proposedData: formData,
+                        requesterId: currentUser?.id,
+                        requesterName: currentUser?.name,
+                        requesterTeamId: currentUser?.teamId
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to submit request');
+                }
+
+                alert('Your changes have been submitted to SSE for approval.');
+                setIsAddModalOpen(false);
+                setEditingAsset(null);
+                resetForm();
+                return;
+            }
+
             const url = editingAsset
                 ? `/api/assets/signal/${editingAsset.id}`
                 : '/api/assets/signal';
@@ -171,8 +204,8 @@ export default function SignalAssetsPage() {
             <td><input type="text" value={formData[category]?.make || ''} onChange={(e) => updateEquipment(category, 'make', e.target.value)} /></td>
             <td><input type="text" value={formData[category]?.type || ''} onChange={(e) => updateEquipment(category, 'type', e.target.value)} /></td>
             <td><input type="text" value={formData[category]?.slNo || ''} onChange={(e) => updateEquipment(category, 'slNo', e.target.value)} /></td>
-            <td><input type="date" value={formData[category]?.dom || ''} onChange={(e) => updateEquipment(category, 'dom', e.target.value)} /></td>
-            <td><input type="date" value={formData[category]?.doi || ''} onChange={(e) => updateEquipment(category, 'doi', e.target.value)} /></td>
+            <td><input type="date" value={formData[category]?.dom || ''} onChange={(e) => updateEquipment(category, 'dom', e.target.value)} min="1990-01-01" max={new Date().toISOString().split('T')[0]} /></td>
+            <td><input type="date" value={formData[category]?.doi || ''} onChange={(e) => updateEquipment(category, 'doi', e.target.value)} min="1990-01-01" max={new Date().toISOString().split('T')[0]} /></td>
             <td><input type="number" value={formData[category]?.qty || 0} onChange={(e) => updateEquipment(category, 'qty', parseInt(e.target.value) || 0)} /></td>
         </tr>
     );
@@ -276,13 +309,15 @@ export default function SignalAssetsPage() {
                         className="input"
                         style={{ width: '250px' }}
                     />
-                    <button
-                        className="btn btn-primary"
-                        onClick={() => { setEditingAsset(null); resetForm(); setIsAddModalOpen(true); }}
-                    >
-                        + Add Signal Asset
-                    </button>
-                    <a href="/dashboard/sse" className="btn btn-outline">
+                    {!isOfficer && (
+                        <button
+                            className="btn btn-primary"
+                            onClick={() => { setEditingAsset(null); resetForm(); setIsAddModalOpen(true); }}
+                        >
+                            + Add Signal Asset
+                        </button>
+                    )}
+                    <a href={currentUser?.role === 'sse' ? '/dashboard/sse' : '/'} className="btn btn-outline">
                         Back to Dashboard
                     </a>
                 </div>
@@ -323,8 +358,12 @@ export default function SignalAssetsPage() {
                                                 borderLeft: '1px solid #e2e8f0'
                                             }}>
                                                 <div style={{ display: 'flex', gap: '5px' }}>
-                                                    <button className="btn btn-sm btn-outline" onClick={() => { setEditingAsset(asset); setIsAddModalOpen(true); }}>Edit</button>
-                                                    <button className="btn btn-sm btn-outline" style={{ borderColor: '#ef4444', color: '#ef4444' }} onClick={() => handleDelete(asset.id)}>Delete</button>
+                                                    <button className="btn btn-sm btn-outline" onClick={() => { setEditingAsset(asset); setIsAddModalOpen(true); }}>
+                                                        {isOfficer ? 'View' : 'Edit'}
+                                                    </button>
+                                                    {(isSSE) && (
+                                                        <button className="btn btn-sm btn-outline" style={{ borderColor: '#ef4444', color: '#ef4444' }} onClick={() => handleDelete(asset.id)}>Delete</button>
+                                                    )}
                                                 </div>
                                             </td>
                                         );
@@ -464,8 +503,14 @@ export default function SignalAssetsPage() {
                             )}
 
                             <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>{editingAsset ? 'Update' : 'Create'}</button>
-                                <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => { setIsAddModalOpen(false); setEditingAsset(null); resetForm(); }}>Cancel</button>
+                                {!isOfficer && (
+                                    <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>
+                                        {isFieldStaff ? 'Submit for Approval' : (editingAsset ? 'Update' : 'Create')}
+                                    </button>
+                                )}
+                                <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => { setIsAddModalOpen(false); setEditingAsset(null); resetForm(); }}>
+                                    {isOfficer ? 'Close' : 'Cancel'}
+                                </button>
                             </div>
                         </form>
                     </div>

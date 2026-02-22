@@ -6,24 +6,59 @@ interface Props {
     onPageChange: (page: number) => void;
     totalItems: number;
     loading?: boolean;
+    pageSize?: number;
+    onPageSizeChange?: (size: number) => void;
 }
 
-export function PaginationControls({ currentPage, totalPages, onPageChange, totalItems, loading }: Props) {
-    if (totalPages <= 1) return null;
+export function PaginationControls({
+    currentPage,
+    totalPages,
+    onPageChange,
+    totalItems,
+    loading,
+    pageSize = 10,
+    onPageSizeChange
+}: Props) {
+    if (totalItems === 0) return null;
 
     return (
         <div style={{
             display: 'flex',
-            justifyContent: 'space-between',
+            justifyContent: 'flex-end',
             alignItems: 'center',
+            gap: '24px',
             marginTop: '20px',
             paddingTop: '15px',
             borderTop: '1px solid var(--border)'
         }}>
+            {onPageSizeChange && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontSize: '13px', color: 'var(--muted)' }}>Rows per page:</span>
+                    <select
+                        value={pageSize}
+                        onChange={(e) => onPageSizeChange(Number(e.target.value))}
+                        disabled={loading}
+                        style={{
+                            padding: '4px 8px',
+                            fontSize: '13px',
+                            borderRadius: '6px',
+                            border: '1px solid var(--border)',
+                            background: 'white',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        {[10, 20, 50, 100].map(size => (
+                            <option key={size} value={size}>{size}</option>
+                        ))}
+                    </select>
+                </div>
+            )}
+
             <div style={{ fontSize: '13px', color: 'var(--muted)' }}>
                 Page <strong>{currentPage}</strong> of <strong>{totalPages}</strong> ({totalItems} items)
             </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
+
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                 <button
                     className="btn btn-outline btn-sm"
                     onClick={() => onPageChange(currentPage - 1)}
@@ -33,7 +68,6 @@ export function PaginationControls({ currentPage, totalPages, onPageChange, tota
                     Previous
                 </button>
                 <div style={{ display: "flex", gap: "4px" }}>
-                    {/* Simple page numbers */}
                     {Array.from({ length: totalPages }, (_, i) => i + 1)
                         .filter(p => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
                         .map((p, i, arr) => (

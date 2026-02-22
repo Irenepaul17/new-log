@@ -17,6 +17,7 @@ const UserSchema = new Schema<User>(
         pfNumber: { type: String, required: true },
         superiorId: { type: String }, // Can be reference to another User's ID
         teamId: { type: String },
+        division: { type: String },
     },
     {
         toJSON: {

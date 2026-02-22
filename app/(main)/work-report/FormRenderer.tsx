@@ -102,8 +102,8 @@ export function FormRenderer({ schema, answers, setAnswer, getOptions }: Props) 
                 value={value ?? ''}
                 onChange={e => setAnswer(key, e.target.value)}
                 required={!!q.required}
-                min="2000-01-01"
-                max="2100-12-31"
+                min="2024-01-01"
+                max={new Date().toISOString().split('T')[0]}
               />
             )}
 

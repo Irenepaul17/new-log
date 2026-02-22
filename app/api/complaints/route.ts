@@ -27,31 +27,31 @@ export async function GET(request: Request) {
         const role = searchParams.get('role');
         const pageParam = searchParams.get('page');
         const limitParam = searchParams.get('limit');
+        const monthParam = searchParams.get('month'); // YYYY-MM
 
         let query: any = {};
+
+        // Month Filtering Logic
+        if (monthParam) {
+            const [year, month] = monthParam.split('-').map(Number);
+            const start = new Date(year, month - 1, 1);
+            const end = new Date(year, month, 1);
+            query.createdAt = { $gte: start, $lt: end };
+        }
 
         // Apply role-based filtering
         if (role === 'sr-dste' || role === 'dste') {
             // Sr. DSTE and DSTE can see ALL complaints
-            query = {};
-        } else if (role === 'adste') {
-            // ADSTE can see own complaints + all subordinates (SSE, JE, technician)
+        } else if (role === 'adste' || role === 'sse') {
+            // ADSTE/SSE see own + all subordinates
             if (userId) {
                 const subordinateIds = await getAllSubordinateIds(userId);
-                // Include own complaints + subordinate complaints
-                query = { authorId: { $in: [userId, ...subordinateIds] } };
-            }
-        } else if (role === 'sse') {
-            // SSE can see own complaints + JE complaints + technician complaints
-            if (userId) {
-                const subordinateIds = await getAllSubordinateIds(userId);
-                // Include own complaints + subordinate complaints
-                query = { authorId: { $in: [userId, ...subordinateIds] } };
+                query.authorId = { $in: [userId, ...subordinateIds] };
             }
         } else if (role === 'je' || role === 'technician') {
-            // JE and technician can only see their own complaints
+            // JE/tech see own only
             if (userId) {
-                query = { authorId: userId };
+                query.authorId = userId;
             }
         }
 
@@ -84,9 +84,13 @@ export async function GET(request: Request) {
         const complaints = await ComplaintModel.find(query).sort({ createdAt: -1 });
         return NextResponse.json(complaints);
 
-    } catch (error) {
-        console.error('Failed to fetch complaints:', error);
-        return NextResponse.json({ error: 'Failed to fetch complaints' }, { status: 500 });
+    } catch (error: any) {
+        console.error('❌ Failed to fetch complaints:', error);
+        return NextResponse.json({
+            error: 'Failed to fetch complaints',
+            details: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        }, { status: 500 });
     }
 }
 

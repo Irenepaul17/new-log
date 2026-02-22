@@ -59,6 +59,25 @@ export async function POST(request: Request) {
         await dbConnect();
         const body = await request.json();
 
+        // Date Validation for Equipment
+        const categories = ['rg', 'hg', 'hhg', 'dg', 'shunt', 'routeEquipment', 'amarker', 'callingon'];
+        const today = new Date();
+        const minDate = new Date('1990-01-01');
+
+        for (const cat of categories) {
+            const equip = (body as any)[cat];
+            if (equip) {
+                if (equip.dom) {
+                    const d = new Date(equip.dom);
+                    if (d > today || d < minDate) return NextResponse.json({ error: `Invalid DOM for ${cat.toUpperCase()}` }, { status: 400 });
+                }
+                if (equip.doi) {
+                    const d = new Date(equip.doi);
+                    if (d > today || d < minDate) return NextResponse.json({ error: `Invalid DOI for ${cat.toUpperCase()}` }, { status: 400 });
+                }
+            }
+        }
+
         // Basic duplicate check (Section + Signal No)
         const existing = await SignalAssetModel.findOne({
             section: body.section,

@@ -11,6 +11,7 @@ export interface User {
     pfNumber: string;
     superiorId?: string;
     teamId?: string;
+    division: string;
 }
 
 export interface WorkReport {
@@ -46,4 +47,17 @@ export interface Complaint {
     rectificationDetails?: string;
     createdAt?: string;
     updatedAt?: string;
+}
+
+export interface AssetUpdateRequest {
+    id: string;
+    assetId: string | null;
+    assetType: string;
+    requestedBy: string;
+    requestedByName: string;
+    teamId: string;
+    proposedData: any;
+    status: 'pending' | 'approved' | 'rejected';
+    comments?: string;
+    createdAt: string;
 }

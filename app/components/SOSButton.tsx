@@ -8,6 +8,7 @@ export function SOSButton() {
     const [isConfirming, setIsConfirming] = useState(false);
     const [isSending, setIsSending] = useState(false);
     const [done, setDone] = useState(false);
+    const [customMessage, setCustomMessage] = useState("");
 
     if (!currentUser) return null;
 
@@ -19,7 +20,7 @@ export function SOSButton() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     senderId: currentUser.id,
-                    message: `EMERGENCY SOS: ${currentUser.name} (${currentUser.role.toUpperCase()}) needs immediate assistance.`
+                    message: customMessage.trim() || `EMERGENCY SOS: ${currentUser.name} (${currentUser.role.toUpperCase()}) needs immediate assistance.`
                 })
             });
 
@@ -28,6 +29,7 @@ export function SOSButton() {
                 setTimeout(() => {
                     setDone(false);
                     setIsConfirming(false);
+                    setCustomMessage(""); // Reset message
                 }, 3000);
             } else {
                 alert("Failed to send SOS. Please check your connection.");
@@ -107,13 +109,37 @@ export function SOSButton() {
                             <>
                                 <div style={{ fontSize: '50px', marginBottom: '15px' }}>⚠️</div>
                                 <h3 style={{ margin: '0 0 10px 0', color: '#ef4444' }}>CONFIRM EMERGENCY</h3>
-                                <p style={{ fontSize: '14px', color: 'var(--muted)', marginBottom: '25px' }}>
+                                <p style={{ fontSize: '14px', color: 'var(--muted)', marginBottom: '20px' }}>
                                     This will immediately notify all higher authorities (Sr. DSTE, DSTE, ADSTE) about your emergency. Proceed only if urgent.
                                 </p>
+
+                                {/* Custom Message Input */}
+                                <textarea
+                                    placeholder="Describe the emergency (optional)..."
+                                    value={customMessage}
+                                    onChange={(e) => setCustomMessage(e.target.value)}
+                                    disabled={isSending}
+                                    style={{
+                                        width: '100%',
+                                        minHeight: '80px',
+                                        padding: '12px',
+                                        borderRadius: '8px',
+                                        border: '1px solid var(--border)',
+                                        fontSize: '14px',
+                                        fontFamily: 'inherit',
+                                        marginBottom: '20px',
+                                        resize: 'vertical',
+                                        backgroundColor: 'var(--bg)',
+                                        color: 'var(--text)'
+                                    }}
+                                />
                                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
                                     <button
                                         className="btn btn-outline"
-                                        onClick={() => setIsConfirming(false)}
+                                        onClick={() => {
+                                            setIsConfirming(false);
+                                            setCustomMessage("");
+                                        }}
                                         disabled={isSending}
                                         style={{ flex: 1 }}
                                     >

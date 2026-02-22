@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { ResolutionModal } from "@/app/components/ResolutionModal";
 import WorkReportDetailModal from "@/app/components/WorkReportDetailModal";
 import ComplaintDetailModal from "@/app/components/ComplaintDetailModal";
-import { Complaint, WorkReport } from "@/app/types";
+import { Complaint, WorkReport, AssetUpdateRequest } from "@/app/types";
 import { usePaginatedData } from '@/app/hooks/usePaginatedData';
 import { PaginationControls } from '@/app/components/PaginationControls';
 import { SOSButton } from "@/app/components/SOSButton";
@@ -18,10 +18,22 @@ export default function SSEDashboard() {
     const [viewingReport, setViewingReport] = useState<WorkReport | null>(null);
     const [viewingComplaint, setViewingComplaint] = useState<Complaint | null>(null);
     const [isAssetModalOpen, setIsAssetModalOpen] = useState(false);
+    const [assetRequests, setAssetRequests] = useState<AssetUpdateRequest[]>([]);
+    const [requestsLoading, setRequestsLoading] = useState(false);
     const [assetStats, setAssetStats] = useState({
         ei: 0, points: 0, signals: 0, trackCircuits: 0,
         recent: { ei: 0, points: 0, signals: 0, trackCircuits: 0 }
     });
+
+    const fetchAssetRequests = () => {
+        if (!currentUser?.teamId) return;
+        setRequestsLoading(true);
+        fetch(`/api/assets/signal/request?teamId=${currentUser.teamId}&status=pending`)
+            .then(res => res.json())
+            .then(data => setAssetRequests(data))
+            .catch(err => console.error("Failed to load asset requests", err))
+            .finally(() => setRequestsLoading(false));
+    };
 
     useEffect(() => {
         fetch('/api/assets/stats')
@@ -30,82 +42,158 @@ export default function SSEDashboard() {
                 setAssetStats(data);
             })
             .catch(err => console.error("Failed to load asset stats", err));
-    }, []);
+
+        fetchAssetRequests();
+    }, [currentUser]);
+
+    const handleAssetAction = async (requestId: string, action: 'approve' | 'reject') => {
+        let comments = '';
+        if (action === 'reject') {
+            comments = prompt('Enter reason for rejection:') || 'Rejected';
+        }
+
+        try {
+            const response = await fetch(`/api/assets/signal/request/${requestId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action, comments })
+            });
+
+            if (!response.ok) throw new Error('Failed to process request');
+
+            alert(`Request ${action === 'approve' ? 'approved' : 'rejected'} successfully.`);
+            fetchAssetRequests();
+            // Refresh stats if approved
+            if (action === 'approve') {
+                fetch('/api/assets/stats').then(res => res.json()).then(setAssetStats);
+            }
+        } catch (error: any) {
+            alert(error.message);
+        }
+    };
 
     // Fetch Paginated Reports
     const {
-        data: myReports,
+        data: teamReports,
         loading: reportsLoading,
         page: reportsPage,
         setPage: setReportsPage,
+        limit: reportsLimit,
+        setLimit: setReportsLimit,
         meta: reportsMeta
     } = usePaginatedData<WorkReport>(
         '/api/work-reports',
-        { userId: currentUser?.id || '', role: currentUser?.role || '' },
+        { userId: currentUser?.id || '', role: 'sse' },
         10,
-        !!currentUser // enabled
+        !!currentUser
     );
 
     // Fetch Paginated Complaints
     const {
-        data: myComplaints,
+        data: teamComplaints,
         loading: complaintsLoading,
         page: complaintsPage,
         setPage: setComplaintsPage,
+        limit: complaintsLimit,
+        setLimit: setComplaintsLimit,
         meta: complaintsMeta,
         refresh: refreshComplaints
     } = usePaginatedData<Complaint>(
         '/api/complaints',
-        { userId: currentUser?.id || '', role: currentUser?.role || '' },
+        { userId: currentUser?.id || '', role: 'sse' },
         10,
-        !!currentUser // enabled
+        !!currentUser
     );
 
     // ... handle logout or other effects if any
 
     if (!currentUser) return null;
 
-    const renderAssetCard = (title: string, count: number, recentCount: number, color: string, bgColor: string, borderColor: string) => (
-        <div style={{
-            background: bgColor,
-            border: `1px solid ${borderColor}`,
-            borderRadius: '12px',
-            padding: '20px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-            position: 'relative'
-        }}>
+    const renderAssetCard = (title: string, count: number, recentCount: number, color: string, bgColor: string, borderColor: string, shortName: string) => (
+        <div
+            className="asset-card"
+            style={{
+                background: bgColor,
+                border: `1px solid ${borderColor}`,
+                borderRadius: '16px',
+                padding: '24px 20px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
+                position: 'relative',
+                overflow: 'hidden',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                cursor: 'pointer'
+            }}
+        >
+            <style jsx>{`
+                .asset-card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+                }
+            `}</style>
+
             {recentCount > 0 && (
                 <div style={{
                     position: 'absolute',
-                    top: '-10px',
-                    right: '-10px',
+                    top: '12px',
+                    right: '12px',
                     background: color,
                     color: 'white',
-                    padding: '4px 10px',
+                    padding: '3px 10px',
                     borderRadius: '20px',
-                    fontSize: '11px',
-                    fontWeight: '700',
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-                    animation: 'pulse 2s infinite'
+                    fontSize: '10px',
+                    fontWeight: '800',
+                    boxShadow: '0 2px 8px -2px ' + color,
+                    animation: 'pulse 2s infinite',
+                    zIndex: 2
                 }}>
                     +{recentCount} NEW
                 </div>
             )}
-            <div style={{ fontSize: '36px', fontWeight: '800', color: color, lineHeight: 1, marginBottom: '8px' }}>
+
+            <div style={{ fontSize: '42px', fontWeight: '900', color: color, lineHeight: 1, marginBottom: '2px', letterSpacing: '-1px' }}>
                 {count}
             </div>
-            <div style={{ fontSize: '14px', color: color, fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                {title}
-            </div>
+
             {recentCount > 0 && (
-                <div style={{ fontSize: '11px', color: color, marginTop: '5px', opacity: 0.8 }}>
-                    {recentCount} added in last 24h
+                <div style={{
+                    fontSize: '10px',
+                    color: color,
+                    fontWeight: '700',
+                    opacity: 0.8,
+                    marginBottom: '8px',
+                    textAlign: 'center'
+                }}>
+                    recently added {recentCount} assets in {shortName}
                 </div>
             )}
+
+            <div style={{
+                fontSize: '12px',
+                color: 'var(--muted)',
+                fontWeight: '700',
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+                marginTop: recentCount > 0 ? '0' : '10px'
+            }}>
+                {title}
+            </div>
+
+            {/* Subtle background decoration */}
+            <div style={{
+                position: 'absolute',
+                bottom: '-20px',
+                right: '-20px',
+                width: '80px',
+                height: '80px',
+                borderRadius: '50%',
+                background: color,
+                opacity: 0.03,
+                zIndex: 0
+            }} />
         </div>
     );
 
@@ -136,10 +224,10 @@ export default function SSEDashboard() {
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '20px' }}>
-                    {renderAssetCard("EI Assets", assetStats.ei, assetStats.recent.ei, "#0284c7", "#f0f9ff", "#bae6fd")}
-                    {renderAssetCard("Points", assetStats.points, assetStats.recent.points, "#db2777", "#fdf2f8", "#fbcfe8")}
-                    {renderAssetCard("Signals", assetStats.signals, assetStats.recent.signals, "#ca8a04", "#fefce8", "#fde047")}
-                    {renderAssetCard("Track Circuits", assetStats.trackCircuits, assetStats.recent.trackCircuits, "#16a34a", "#f0fdf4", "#bbf7d0")}
+                    {renderAssetCard("EI Assets", assetStats.ei, assetStats.recent.ei, "#0284c7", "#f0f9ff", "#bae6fd", "EI")}
+                    {renderAssetCard("Points", assetStats.points, assetStats.recent.points, "#db2777", "#fdf2f8", "#fbcfe8", "Points")}
+                    {renderAssetCard("Signals", assetStats.signals, assetStats.recent.signals, "#ca8a04", "#fefce8", "#fde047", "Signals")}
+                    {renderAssetCard("Track Circuits", assetStats.trackCircuits, assetStats.recent.trackCircuits, "#16a34a", "#f0fdf4", "#bbf7d0", "Track Circuits")}
                 </div>
             </div>
 
@@ -150,8 +238,55 @@ export default function SSEDashboard() {
                 </a>
             </div>
 
+            {assetRequests.length > 0 && (
+                <div className="card" style={{ borderLeft: '4px solid var(--primary)', marginBottom: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                        <h3 className="section-title" style={{ margin: 0, color: 'var(--primary)' }}>🔔 Pending Asset Approvals</h3>
+                        <span className="badge badge-error">{assetRequests.length} REQUESTS</span>
+                    </div>
+                    <div className="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Asset</th>
+                                    <th>Requested By</th>
+                                    <th>Date</th>
+                                    <th>Proposed Change</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {assetRequests.map(req => (
+                                    <tr key={req.id}>
+                                        <td>
+                                            <div style={{ fontWeight: 600 }}>{req.proposedData.signalNoShuntNo}</div>
+                                            <div style={{ fontSize: '11px', color: 'var(--muted)' }}>{req.proposedData.stationAutoSectionLcIbs}</div>
+                                        </td>
+                                        <td>{req.requestedByName}</td>
+                                        <td>{new Date(req.createdAt).toLocaleDateString()}</td>
+                                        <td style={{ maxWidth: '300px' }}>
+                                            <div style={{ fontSize: '12px', color: '#475569', background: '#f8fafc', padding: '8px', borderRadius: '4px' }}>
+                                                {req.assetId ? 'Modification to existing asset' : 'New asset registration'}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                <button className="btn btn-primary btn-sm" onClick={() => handleAssetAction(req.id, 'approve')}>Approve</button>
+                                                <button className="btn btn-outline btn-sm" style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={() => handleAssetAction(req.id, 'reject')}>Reject</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+
             <div className="card">
-                <div className="section-title">Technicians Log Book</div>
+                <div className="section-title">
+                    Technicians Log Book {reportsMeta && `(${reportsMeta.total})`}
+                </div>
                 <div className="table-container">
                     {reportsLoading ? (
                         <div style={{ padding: '20px', textAlign: 'center', color: 'var(--muted)' }}>Loading reports...</div>
@@ -167,7 +302,7 @@ export default function SSEDashboard() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {myReports.length > 0 ? myReports.map((r: WorkReport) => (
+                                {teamReports.length > 0 ? teamReports.map((r: WorkReport) => (
                                     <tr key={r.id}>
                                         <td>{r.date}</td>
                                         <td>{r.authorName}</td>
@@ -195,6 +330,8 @@ export default function SSEDashboard() {
                             totalPages={reportsMeta.totalPages}
                             totalItems={reportsMeta.total}
                             onPageChange={setReportsPage}
+                            pageSize={reportsLimit}
+                            onPageSizeChange={setReportsLimit}
                             loading={reportsLoading}
                         />
                     )}
@@ -202,7 +339,9 @@ export default function SSEDashboard() {
             </div>
 
             <div className="card">
-                <div className="section-title">Failure Reports</div>
+                <div className="section-title">
+                    Failure Reports {complaintsMeta && `(${complaintsMeta.total})`}
+                </div>
                 <div className="alert alert-info" style={{ marginBottom: '20px', fontSize: '13px' }}>
                     💡 Failures are automatically generated from failure reports. You can resolve failures reported by your team.
                 </div>
@@ -215,7 +354,7 @@ export default function SSEDashboard() {
                                 <tr><th>ID</th><th>Status</th><th>Raised By</th><th>Issue</th><th>Actions</th></tr>
                             </thead>
                             <tbody>
-                                {myComplaints.map((c: Complaint) => (
+                                {teamComplaints.length > 0 ? teamComplaints.map((c: Complaint) => (
                                     <tr key={c.id}>
                                         <td>{c.id}</td>
                                         <td>
@@ -239,8 +378,7 @@ export default function SSEDashboard() {
                                             </div>
                                         </td>
                                     </tr>
-                                ))}
-                                {myComplaints.length === 0 && (
+                                )) : (
                                     <tr><td colSpan={5} style={{ textAlign: 'center', color: 'var(--muted)' }}>No complaints found.</td></tr>
                                 )}
                             </tbody>
@@ -252,6 +390,8 @@ export default function SSEDashboard() {
                             totalPages={complaintsMeta.totalPages}
                             totalItems={complaintsMeta.total}
                             onPageChange={setComplaintsPage}
+                            pageSize={complaintsLimit}
+                            onPageSizeChange={setComplaintsLimit}
                             loading={complaintsLoading}
                         />
                     )}
