@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useGlobal } from '@/app/context/GlobalContext';
 import { usePaginatedData } from '@/app/hooks/usePaginatedData';
@@ -9,6 +10,14 @@ import { PaginationControls } from '@/app/components/PaginationControls';
 import WorkReportDetailModal from '@/app/components/WorkReportDetailModal';
 
 export default function LogsPage() {
+    return (
+        <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>Loading logs...</div>}>
+            <LogsPageContent />
+        </Suspense>
+    );
+}
+
+function LogsPageContent() {
     const { currentUser } = useGlobal();
     const searchParams = useSearchParams();
     const month = searchParams.get('month');

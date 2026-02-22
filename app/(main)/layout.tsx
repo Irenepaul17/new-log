@@ -1,11 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, Suspense } from "react";
 import { useGlobal } from "@/app/context/GlobalContext";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
 export default function MainLayout({
+    children,
+}: Readonly<{
+    children: React.ReactNode;
+}>) {
+    return (
+        <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>Loading structure...</div>}>
+            <MainLayoutContent>{children}</MainLayoutContent>
+        </Suspense>
+    );
+}
+
+function MainLayoutContent({
     children,
 }: Readonly<{
     children: React.ReactNode;

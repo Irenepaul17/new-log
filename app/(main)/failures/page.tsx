@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useGlobal } from '@/app/context/GlobalContext';
 import { usePaginatedData } from '@/app/hooks/usePaginatedData';
@@ -10,6 +11,14 @@ import ComplaintDetailModal from '@/app/components/ComplaintDetailModal';
 import { ResolutionModal } from '@/app/components/ResolutionModal';
 
 export default function FailuresPage() {
+    return (
+        <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>Loading failures...</div>}>
+            <FailuresPageContent />
+        </Suspense>
+    );
+}
+
+function FailuresPageContent() {
     const { currentUser, resolveComplaint } = useGlobal();
     const searchParams = useSearchParams();
     const month = searchParams.get('month');
