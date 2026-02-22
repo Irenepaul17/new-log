@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import React, { useState, useRef, useEffect, Suspense } from "react";
+import { useState, useRef, useEffect, Suspense, ReactNode } from "react";
 import { useGlobal } from "@/app/context/GlobalContext";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 
