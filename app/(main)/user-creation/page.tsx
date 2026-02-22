@@ -49,7 +49,8 @@ export default function UserCreationPage() {
             sub: role.toUpperCase(),
             email: `${name.toLowerCase().replace(' ', '.')}@railnet.gov.in`,
             superiorId,
-            teamId: superior?.teamId
+            teamId: superior?.teamId,
+            division: currentUser?.division || 'Unknown'
         });
 
         alert(`User ${name} created and assigned to ${superior?.name}`);

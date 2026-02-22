@@ -55,7 +55,8 @@ export default function HierarchyPage() {
             pfNumber: newPf,
             role: newRole,
             sub: ROLE_LABELS[newRole],
-            superiorId: currentUser.id
+            superiorId: currentUser.id,
+            division: currentUser?.division || 'Unknown'
         });
 
         setIsModalOpen(false);
