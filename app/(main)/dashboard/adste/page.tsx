@@ -46,7 +46,7 @@ export default function ADSTEDashboard() {
 
     // Fetch Paginated Complaints
     const {
-        data: failureReports,
+        data: teamComplaints,
         loading: complaintsLoading,
         page: complaintsPage,
         setPage: setComplaintsPage,
